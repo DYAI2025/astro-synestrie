@@ -1,5 +1,4 @@
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 
 import { createApp } from "./src/server/app";
@@ -12,6 +11,8 @@ async function startServer() {
 
   // Static / dev middleware AFTER the same-origin /api routes.
   if (process.env.NODE_ENV !== "production") {
+    // vite is dev-only: imported dynamically so the production container never loads it.
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa"
