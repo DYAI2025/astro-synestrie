@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+test-results
+playwright-report
+blob-report
+playwright/.cache
+docs/qa/screenshots
+*.zip
+.DS_Store
+npm-debug.log*
