@@ -108,10 +108,30 @@ export function toBirthInputPayload(data: BirthData): BirthInputPayload {
 }
 
 function formatValidationFields(fields: unknown): string {
-  if (!Array.isArray(fields) || fields.length === 0) return "";
-  const names = fields
-    .map((field: FieldError | unknown) => (field && typeof field === "object" && "field" in field ? String((field as FieldError).field) : ""))
-    .filter(Boolean);
+  const names: string[] = [];
+
+  const collectFromArray = (arr: unknown[], prefix?: string) => {
+    for (const item of arr) {
+      if (item && typeof item === "object" && "field" in item) {
+        const fieldName = String((item as FieldError).field);
+        names.push(prefix ? `${prefix}.${fieldName}` : fieldName);
+      }
+    }
+  };
+
+  // Flat FieldError[]
+  if (Array.isArray(fields)) {
+    if (fields.length === 0) return "";
+    collectFromArray(fields);
+  } else if (fields && typeof fields === "object") {
+    // Nested structures, e.g. { user: FieldError[]; partner: FieldError[] }
+    for (const [key, value] of Object.entries(fields as Record<string, unknown>)) {
+      if (Array.isArray(value) && value.length > 0) {
+        collectFromArray(value, key);
+      }
+    }
+  }
+
   return names.length > 0 ? ` Betroffene Felder: ${names.join(", ")}.` : "";
 }
 
