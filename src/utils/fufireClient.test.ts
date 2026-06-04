@@ -19,6 +19,7 @@ beforeEach(() => {
   process.env.FUFIRE_API_URL = "https://fufire.example.com";
   process.env.FUFIRE_API_KEY = "secret-key-123";
   process.env.FUFIRE_API_VERSION = "v1";
+  delete process.env.FUFIRE_API_PATH_PREFIX;
   process.env.REQUEST_TIMEOUT_MS = "12000";
 });
 
@@ -61,11 +62,26 @@ describe("FuFirEClient request shape", () => {
     expect(JSON.parse(opts.body)).toEqual(payload);
   });
 
-  it("uses configurable version prefix", async () => {
-    process.env.FUFIRE_API_VERSION = "v2";
+  it("keeps release labels out of upstream routes", async () => {
+    process.env.FUFIRE_API_VERSION = "1.0.0-rc1-20260220";
+    const fetchMock = mockFetchOnce(200, {});
+    await FuFirEClient.postBazi({} as any);
+    expect(fetchMock.mock.calls[0][0]).toBe("https://fufire.example.com/v1/calculate/bazi");
+  });
+
+  it("uses explicit FUFIRE_API_PATH_PREFIX for upstream routes", async () => {
+    process.env.FUFIRE_API_VERSION = "1.0.0-rc1-20260220";
+    process.env.FUFIRE_API_PATH_PREFIX = "v2";
     const fetchMock = mockFetchOnce(200, {});
     await FuFirEClient.postBazi({} as any);
     expect(fetchMock.mock.calls[0][0]).toBe("https://fufire.example.com/v2/calculate/bazi");
+  });
+
+  it("supports legacy FUFIRE_API_VERSION=v1 as the /v1 route prefix", async () => {
+    process.env.FUFIRE_API_VERSION = "/v1";
+    const fetchMock = mockFetchOnce(200, {});
+    await FuFirEClient.postWestern({} as any);
+    expect(fetchMock.mock.calls[0][0]).toBe("https://fufire.example.com/v1/calculate/western");
   });
 
   it("does NOT leak the api key into thrown error messages", async () => {
@@ -102,9 +118,19 @@ describe("FuFirEClient error mapping", () => {
     await expect(FuFirEClient.postChart({} as any)).rejects.toMatchObject({ code: "fufire_auth_failed" });
   });
 
+  it("maps 400 to invalid_fufire_payload", async () => {
+    mockFetchOnce(400, {});
+    await expect(FuFirEClient.postChart({} as any)).rejects.toMatchObject({ code: "invalid_fufire_payload" });
+  });
+
   it("maps 422 to invalid_fufire_payload", async () => {
     mockFetchOnce(422, {});
     await expect(FuFirEClient.postChart({} as any)).rejects.toMatchObject({ code: "invalid_fufire_payload" });
+  });
+
+  it("maps 404 to fufire_route_not_found", async () => {
+    mockFetchOnce(404, {});
+    await expect(FuFirEClient.postChart({} as any)).rejects.toMatchObject({ code: "fufire_route_not_found" });
   });
 
   it("maps 429 to fufire_rate_limited", async () => {
