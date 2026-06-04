@@ -23,6 +23,7 @@ export type FuFirEErrorCode =
   | "missing_fufire_key"
   | "fufire_auth_failed"
   | "invalid_fufire_payload"
+  | "fufire_route_not_found"
   | "fufire_rate_limited"
   | "fufire_unavailable";
 
@@ -31,6 +32,7 @@ const ERROR_HTTP_STATUS: Record<FuFirEErrorCode, number> = {
   missing_fufire_key: 503,
   fufire_auth_failed: 502,
   invalid_fufire_payload: 502,
+  fufire_route_not_found: 502,
   fufire_rate_limited: 503,
   fufire_unavailable: 502
 };
@@ -40,6 +42,7 @@ const SAFE_MESSAGES: Record<FuFirEErrorCode, string> = {
   missing_fufire_key: "FuFirE-API-Schluessel ist serverseitig nicht konfiguriert.",
   fufire_auth_failed: "FuFirE-Authentifizierung fehlgeschlagen.",
   invalid_fufire_payload: "FuFirE hat die uebermittelten Geburtsdaten abgelehnt.",
+  fufire_route_not_found: "FuFirE-Route ist derzeit nicht erreichbar.",
   fufire_rate_limited: "FuFirE ist aktuell ratenbegrenzt. Bitte spaeter erneut versuchen.",
   fufire_unavailable: "FuFirE ist derzeit nicht erreichbar."
 };
@@ -78,9 +81,25 @@ function getApiKey(): string {
   return key;
 }
 
-function getVersionPrefix(): string {
-  const version = (process.env.FUFIRE_API_VERSION || "v1").trim().replace(/^\/|\/$/g, "");
-  return `/${version}`;
+export function getFuFirePathPrefix(): string {
+  const explicit = (process.env.FUFIRE_API_PATH_PREFIX || "").trim();
+  const legacy = (process.env.FUFIRE_API_VERSION || "").trim();
+
+  const raw = explicit || (legacy === "v1" || legacy === "/v1" ? legacy : "v1");
+
+  return `/${raw.replace(/^\/|\/$/g, "")}`;
+}
+
+export function getFuFireReleaseVersion(): string | null {
+  const raw = (process.env.FUFIRE_API_VERSION || "").trim();
+
+  if (!raw || raw === "v1" || raw === "/v1") return null;
+
+  return raw;
+}
+
+function getPathPrefixValue(): string {
+  return getFuFirePathPrefix();
 }
 
 function getTimeoutMs(): number {
@@ -89,17 +108,29 @@ function getTimeoutMs(): number {
 }
 
 function mapStatusToError(status: number): FuFirEError {
+  if (status === 400 || status === 422) return new FuFirEError("invalid_fufire_payload");
   if (status === 401 || status === 403) return new FuFirEError("fufire_auth_failed");
-  if (status === 422) return new FuFirEError("invalid_fufire_payload");
+  if (status === 404) return new FuFirEError("fufire_route_not_found");
   if (status === 429) return new FuFirEError("fufire_rate_limited");
   return new FuFirEError("fufire_unavailable");
+}
+
+function logUpstreamError(method: "GET" | "POST", endpoint: string, pathPrefix: string, upstreamStatus: number | null, errorCode: FuFirEErrorCode): void {
+  console.warn("fufire_upstream_error", {
+    method,
+    endpoint,
+    pathPrefix: pathPrefix.replace(/^\//, ""),
+    upstreamStatus,
+    errorCode
+  });
 }
 
 async function request(method: "GET" | "POST", endpoint: string, payload?: unknown): Promise<any> {
   // Resolve config first — throws missing_fufire_* before any network access.
   const baseUrl = getBaseUrl();
   const apiKey = getApiKey();
-  const url = `${baseUrl}${getVersionPrefix()}${endpoint}`;
+  const pathPrefix = getPathPrefixValue();
+  const url = `${baseUrl}${pathPrefix}${endpoint}`;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), getTimeoutMs());
@@ -117,19 +148,25 @@ async function request(method: "GET" | "POST", endpoint: string, payload?: unkno
     });
   } catch {
     // Network failure, DNS, or AbortError (timeout) — never expose details.
-    throw new FuFirEError("fufire_unavailable");
+    const error = new FuFirEError("fufire_unavailable");
+    logUpstreamError(method, endpoint, pathPrefix, null, error.code);
+    throw error;
   } finally {
     clearTimeout(timer);
   }
 
   if (!res.ok) {
-    throw mapStatusToError(res.status);
+    const error = mapStatusToError(res.status);
+    logUpstreamError(method, endpoint, pathPrefix, res.status, error.code);
+    throw error;
   }
 
   try {
     return await res.json();
   } catch {
-    throw new FuFirEError("fufire_unavailable");
+    const error = new FuFirEError("fufire_unavailable");
+    logUpstreamError(method, endpoint, pathPrefix, res.status, error.code);
+    throw error;
   }
 }
 
@@ -188,6 +225,14 @@ export class FuFirEClient {
     } catch {
       return "error";
     }
+  }
+
+  static getPathPrefix(): string {
+    return getFuFirePathPrefix().replace(/^\//, "");
+  }
+
+  static getReleaseVersion(): string | null {
+    return getFuFireReleaseVersion();
   }
 
   static isConfigured(): { url: boolean; key: boolean } {

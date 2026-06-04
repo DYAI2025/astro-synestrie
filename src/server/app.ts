@@ -62,6 +62,16 @@ function sendError(res: Response, err: any, fallbackStatus = 500): void {
   });
 }
 
+function getFuFireConfigSummary(): { pathPrefix: string; releaseVersion: string | null; versionPrefix: string } {
+  const pathPrefix = FuFirEClient.getPathPrefix();
+  return {
+    pathPrefix,
+    releaseVersion: FuFirEClient.getReleaseVersion(),
+    // Backward compatibility: versionPrefix now means actual route prefix, not release metadata.
+    versionPrefix: pathPrefix
+  };
+}
+
 /** FuFirE-first with explicit, opt-in local fallback only on missing config. */
 async function resolveProfile(value: ValidatedBirthInput): Promise<ProfileServiceResult> {
   try {
@@ -148,7 +158,7 @@ export function createApp(): Express {
       fufire: {
         baseUrlConfigured: fufire.url,
         apiKeyConfigured: fufire.key,
-        versionPrefix: (process.env.FUFIRE_API_VERSION || "v1").replace(/^\/|\/$/g, "")
+        ...getFuFireConfigSummary()
       },
       places: {
         provider: "google",
@@ -187,7 +197,7 @@ export function createApp(): Express {
     res.json({
       baseUrlConfigured: fufire.url,
       apiKeyConfigured: fufire.key,
-      versionPrefix: (process.env.FUFIRE_API_VERSION || "v1").replace(/^\/|\/$/g, ""),
+      ...getFuFireConfigSummary(),
       endpoints: ["/v1/chart", "/v1/calculate/western", "/v1/calculate/bazi", "/v1/calculate/wuxing", "/v1/calculate/fusion", "/v1/calculate/tst", "/v1/experience/bootstrap", "/v1/experience/daily", "/v1/info/wuxing-mapping"]
     });
   });

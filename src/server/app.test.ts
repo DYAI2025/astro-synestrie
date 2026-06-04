@@ -25,7 +25,9 @@ vi.mock("../utils/fufireClient", () => {
       postExperienceBootstrap: vi.fn(),
       postExperienceDaily: vi.fn(),
       probeHealth: vi.fn(async () => "ok"),
-      isConfigured: vi.fn(() => ({ url: true, key: true }))
+      isConfigured: vi.fn(() => ({ url: true, key: true })),
+      getPathPrefix: vi.fn(() => "v1"),
+      getReleaseVersion: vi.fn(() => null)
     }
   };
 });
@@ -78,6 +80,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   (FuFirEClient.probeHealth as any).mockResolvedValue("ok");
   (FuFirEClient.isConfigured as any).mockReturnValue({ url: true, key: true });
+  (FuFirEClient.getPathPrefix as any).mockReturnValue("v1");
+  (FuFirEClient.getReleaseVersion as any).mockReturnValue(null);
 });
 afterEach(() => {
   process.env = { ...ORIGINAL_ENV };
@@ -228,7 +232,19 @@ describe("Config & Health", () => {
     expect(res.body.fufire.baseUrlConfigured).toBe(true);
     expect(res.body.fufire.apiKeyConfigured).toBe(true);
     expect(JSON.stringify(res.body)).not.toContain("super-secret-value");
+    expect(res.body.fufire.pathPrefix).toBe("v1");
+    expect(res.body.fufire.versionPrefix).toBe("v1");
     expect(Array.isArray(res.body.capabilities)).toBe(true);
+  });
+
+  it("GET /api/config separates route prefix from FuFirE release version", async () => {
+    (FuFirEClient.getPathPrefix as any).mockReturnValue("v1");
+    (FuFirEClient.getReleaseVersion as any).mockReturnValue("1.0.0-rc1-20260220");
+    const res = await request(app).get("/api/config");
+    expect(res.status).toBe(200);
+    expect(res.body.fufire.pathPrefix).toBe("v1");
+    expect(res.body.fufire.versionPrefix).toBe("v1");
+    expect(res.body.fufire.releaseVersion).toBe("1.0.0-rc1-20260220");
   });
 });
 
