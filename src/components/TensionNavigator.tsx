@@ -108,6 +108,14 @@ const REACTIONS: { id: TensionReaction; label: string }[] = [
   { id: "passt_nicht", label: "Passt nicht" },
 ];
 
+// B-010: Anti-Reification-Intro — einmal pro JS-Session (Modul-Flag, bewusst KEIN
+// localStorage: Konzept-Entscheid „per session"). Tab-Wechsel remountet die
+// Komponente, deshalb reicht React-State allein nicht.
+let introDismissedThisSession = false;
+export function __resetIntroForTests(): void {
+  introDismissedThisSession = false;
+}
+
 interface LoopState {
   state: TensionState;
   mode: ReactionMode;
@@ -158,6 +166,11 @@ export default function TensionNavigator({
   // Herkunft-Layer: öffnet sich bei Reaktion „Trifft" ODER per explizitem
   // „Herkunft & Methode"-Link (Konzept §12: Premium klappt in Herkunft auf).
   const [originOpen, setOriginOpen] = React.useState(false);
+  const [introVisible, setIntroVisible] = React.useState(() => !introDismissedThisSession);
+  const dismissIntro = () => {
+    introDismissedThisSession = true;
+    setIntroVisible(false);
+  };
 
   // Profilwechsel → Reaktions-Loop zurücksetzen.
   React.useEffect(() => {
@@ -256,6 +269,26 @@ export default function TensionNavigator({
   return (
     <div id="tension-navigator" className="space-y-6" data-testid="tension-navigator">
       <div className="glass-card p-4 sm:p-6 rounded-2xl relative overflow-hidden gold-glow-border">
+        {introVisible && (
+          <div
+            className="flex items-start justify-between gap-3 mb-3 px-2 py-2 rounded-lg border border-gold-muted/15 bg-obsidian-deep/40"
+            data-testid="tension-intro"
+          >
+            <p className="text-xs text-stone-400 leading-relaxed">
+              Kein Urteil. Das Modell zeigt eine prüfbare Spannungsfrage — du entscheidest,
+              ob sie trägt.
+            </p>
+            <button
+              type="button"
+              onClick={dismissIntro}
+              aria-label="Intro ausblenden"
+              className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-gold-muted hover:text-gold-light transition-colors duration-200"
+              data-testid="tension-intro-dismiss"
+            >
+              Verstanden
+            </button>
+          </div>
+        )}
         <div className="relative">
           <svg
             viewBox="-150 0 1020 720"
