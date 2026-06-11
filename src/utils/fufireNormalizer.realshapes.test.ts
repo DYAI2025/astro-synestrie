@@ -123,12 +123,105 @@ describe("normalizer vs REAL orchestrated prod raw (chart + western + fusion)", 
     expect(vm.wuxing.elementCards).toHaveLength(5);
   });
 
-  it("maps the real FusionResponse (cosmic_state 0..1) to a 0..100 coherence index", () => {
+  it("displays the CALIBRATED coherence (calibration.h_calibrated), not the flattering raw dot-product", () => {
     const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
-    expect(vm.fusion.coherenceIndex).toBeCloseTo(90.8, 1);
+    // calibration.h_calibrated = 0.6144 -> 61.4% (NOT h_raw 0.908 -> 90.8%)
+    expect(vm.fusion.coherenceIndex).toBeCloseTo(61.4, 1);
+    expect(vm.fusion.coherenceCalibrated).toBe(true);
     expect(vm.fusion.source).toBe("fufire");
-    // Engine's own interpretation is surfaced, not a locally invented label.
+    // The engine's calibrated interpretation_band is surfaced, not a locally
+    // invented label and not the raw-harmony flattery.
+    expect(vm.fusion.coherenceRating).toBe("Überdurchschnittliche Kongruenz");
+  });
+
+  it("derives the signal level from the calibration z-score (h_raw vs baseline/sigma)", () => {
+    const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
+    // z = (0.908 - 0.7614) / 0.1445 = 1.015 -> 1 <= |z| < 2 -> "spuerbar"
+    expect(vm.fusion.signalLevel).toBe("spuerbar");
+  });
+
+  it("pins the >= bucket semantics of the signal level (z=0.99 / 1.0 / 2.0)", () => {
+    // Exact binary fractions so the z-score boundaries are hit precisely:
+    // baseline 0.25, sigma 0.25 -> z = (h_raw - 0.25) / 0.25.
+    const vmFor = (hRaw: number) =>
+      normalizeFuFireProfile(
+        { fusion: { calibration: { h_raw: hRaw, h_baseline: 0.25, h_sigma: 0.25 } } },
+        INPUT,
+        "fufire-orchestrated"
+      );
+    // z = 0.99 < 1 -> leise
+    expect(vmFor(0.4975).fusion.signalLevel).toBe("leise");
+    // z = 1.0 -> the >= boundary flips to spuerbar
+    expect(vmFor(0.5).fusion.signalLevel).toBe("spuerbar");
+    // z = 2.0 -> the >= boundary flips to dominant
+    expect(vmFor(0.75).fusion.signalLevel).toBe("dominant");
+  });
+
+  it("falls back to the RAW harmony only when calibration is absent — and flags it", () => {
+    const { calibration, ...uncalibrated } = fusionFixture as any;
+    const vm = normalizeFuFireProfile({ fusion: uncalibrated }, INPUT, "fufire-orchestrated");
+    expect(vm.fusion.coherenceIndex).toBeCloseTo(90.8, 1);
+    expect(vm.fusion.coherenceCalibrated).toBe(false);
+    // Raw harmony_index.interpretation is the best remaining label.
     expect(vm.fusion.coherenceRating).toContain("Starke Resonanz");
+    // No baseline/sigma and no h_calibrated -> no signal level claim.
+    expect(vm.fusion.signalLevel).toBeNull();
+  });
+
+  it("maps elemental_comparison (per-element West-vs-BaZi weights) into the view model", () => {
+    const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
+    expect(vm.fusion.elementalComparison).toHaveLength(5);
+    const holz = vm.fusion.elementalComparison.find((c) => c.element === ElementType.WOOD)!;
+    expect(holz.western).toBeCloseTo(0.61, 2);
+    expect(holz.bazi).toBeCloseTo(0.388, 3);
+    expect(holz.difference).toBeCloseTo(0.222, 3);
+    const metall = vm.fusion.elementalComparison.find((c) => c.element === ElementType.METAL)!;
+    expect(metall.difference).toBeCloseTo(-0.299, 3);
+  });
+
+  it("NEVER invents top signals: they derive from the largest elemental differences", () => {
+    const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
+    // The old hardcoded reading every user saw is gone.
+    const triggers = vm.fusion.topSignals.map((s) => s.trigger).join(" ");
+    expect(triggers).not.toContain("Sonne-Tagesmeister Interferenz");
+    // Top-2 |difference|: Metall (-0.299) and Holz (+0.222).
+    expect(vm.fusion.topSignals).toHaveLength(2);
+    expect(vm.fusion.topSignals[0].trigger).toContain("Metall");
+    expect(vm.fusion.topSignals[1].trigger).toContain("Holz");
+    expect(vm.fusion.topSignals[0].interpretation).toContain("BaZi-Struktur");
+  });
+
+  it("returns NO top signals when the response carries no elemental_comparison", () => {
+    const { elemental_comparison, ...rest } = fusionFixture as any;
+    const vm = normalizeFuFireProfile({ fusion: rest }, INPUT, "fufire-orchestrated");
+    expect(vm.fusion.elementalComparison).toEqual([]);
+    expect(vm.fusion.topSignals).toEqual([]);
+  });
+
+  it("surfaces the engine's REAL fusion_interpretation as integrationText", () => {
+    const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
+    expect(vm.fusion.integrationText).toContain("Harmonie-Index: 90.80%");
+    expect(vm.fusion.integrationText).toContain("Westliche Dominanz: Holz");
+  });
+
+  it("returns integrationText null when the engine sent no fusion_interpretation — NO invented fallback", () => {
+    const { fusion_interpretation, ...rest } = fusionFixture as any;
+    const vm = normalizeFuFireProfile({ fusion: rest }, INPUT, "fufire-orchestrated");
+    // The "Fusions-Deutung der Engine" section must stay hidden instead of
+    // labeling local copy as engine output.
+    expect(vm.fusion.integrationText).toBeNull();
+  });
+
+  it("approximates the signal level from h_calibrated thirds when sigma is missing", () => {
+    const { calibration, ...rest } = fusionFixture as any;
+    const vm = normalizeFuFireProfile(
+      { fusion: { ...rest, calibration: { h_calibrated: 0.6144, interpretation_band: "Überdurchschnittliche Kongruenz" } } },
+      INPUT,
+      "fufire-orchestrated"
+    );
+    // 0.33 <= 0.6144 < 0.66 -> "spuerbar" (documented coarse bucketing)
+    expect(vm.fusion.signalLevel).toBe("spuerbar");
+    expect(vm.fusion.coherenceIndex).toBeCloseTo(61.4, 1);
   });
 });
 
@@ -164,9 +257,10 @@ describe("normalizer vs REAL detail-endpoint shapes (one section each)", () => {
     expect(vm.wuxing.distribution[ElementType.METAL]).toBeCloseTo(6.5, 0);
   });
 
-  it("FusionResponse alone (harmony_index object + cosmic_state)", () => {
+  it("FusionResponse alone (calibration block beats harmony_index/cosmic_state)", () => {
     const vm = normalizeFuFireProfile({ fusion: fusionFixture }, INPUT, "fufire-orchestrated");
-    expect(vm.fusion.coherenceIndex).toBeCloseTo(90.8, 1);
+    expect(vm.fusion.coherenceIndex).toBeCloseTo(61.4, 1);
+    expect(vm.fusion.coherenceCalibrated).toBe(true);
     expect(vm.fusion.source).toBe("fufire");
   });
 });

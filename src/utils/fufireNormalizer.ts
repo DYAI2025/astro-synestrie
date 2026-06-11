@@ -1,6 +1,7 @@
 import { ElementType, YinYang } from "../types";
 import { ProfileViewModel, HouseMeaning, ElementCardData, ProfileSource } from "../viewmodels/profileViewModel";
 import { calculateAstrologyFusion, HEAVENLY_STEMS, EARTHLY_BRANCHES, WESTERN_ZODIAC } from "./astrology";
+import { aspectInterpretation } from "./aspectInterpretation";
 
 // Standard meanings for 12 Houses to combine with planet details
 const HOUSE_TEMPLATES = [
@@ -362,14 +363,20 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
     .filter((asp: any) => asp && typeof asp === "object")
     .map((asp: any) => {
       const typeInfo = typeof asp.type === "string" ? ASPECT_TYPES_DE[asp.type.toLowerCase()] : undefined;
+      const planet1 = germanPlanetName(asp.planet1 || asp.sourceKey || "Unbekannt");
+      const planet2 = germanPlanetName(asp.planet2 || asp.targetKey || "Unbekannt");
+      const typeDe = typeInfo ? typeInfo.name : asp.type || "Aspekt";
       return {
-        planet1: germanPlanetName(asp.planet1 || asp.sourceKey || "Unbekannt"),
-        planet2: germanPlanetName(asp.planet2 || asp.targetKey || "Unbekannt"),
-        type: typeInfo ? typeInfo.name : asp.type || "Aspekt",
+        planet1,
+        planet2,
+        type: typeDe,
         symbol: asp.symbol || (typeInfo ? typeInfo.symbol : "☌"),
         orb: typeof asp.orb === "number" ? asp.orb : 0,
         harmony: asp.harmony || (typeInfo ? typeInfo.harmony : "neutral"),
-        interpretation: asp.interpretation || "Lokale abgeleitete Deutung"
+        // REAL aspects carry no interpretation field — compose a local,
+        // deterministic sentence (aspect-type template x planet keywords)
+        // instead of the former literal placeholder.
+        interpretation: asp.interpretation || aspectInterpretation(planet1, planet2, typeDe)
       };
     });
 
@@ -526,18 +533,53 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
 
   // E. FUSION MATRIX — never fabricate a coherence index for a missing section.
   const rawFusion = raw.fusion && typeof raw.fusion === "object" ? raw.fusion : {};
-  // REAL FusionResponse: cosmic_state (0..1) and harmony_index = OBJECT
-  // { harmony_index: 0..1, interpretation, ... }. Legacy: coherenceIndex 0..100.
+  // REAL FusionResponse: cosmic_state (0..1), harmony_index = OBJECT
+  // { harmony_index: 0..1, interpretation, ... } AND a calibration block
+  // { h_raw, h_calibrated, h_baseline, h_sigma, sigma_above, quality,
+  //   interpretation_band, n_west, n_bazi_contributions }.
+  // Legacy mocks: coherenceIndex 0..100.
   const harmonyObj = rawFusion.harmony_index && typeof rawFusion.harmony_index === "object"
     ? rawFusion.harmony_index : null;
+  const calibration = rawFusion.calibration && typeof rawFusion.calibration === "object"
+    ? rawFusion.calibration : null;
+  const hCalibrated = calibration && typeof calibration.h_calibrated === "number" && Number.isFinite(calibration.h_calibrated)
+    ? calibration.h_calibrated : null;
   const realCoherence01 = typeof rawFusion.cosmic_state === "number" ? rawFusion.cosmic_state
     : harmonyObj && typeof harmonyObj.harmony_index === "number" ? harmonyObj.harmony_index
     : typeof rawFusion.harmony_index === "number" ? rawFusion.harmony_index
     : null;
-  const coherenceIndex = typeof rawFusion.coherenceIndex === "number" ? rawFusion.coherenceIndex
+  // The CALIBRATED value (structure congruence vs. random baseline) is the
+  // honest headline number. The raw dot-product (0.908 -> "91%") flatters
+  // every chart and is only used when the engine sent no calibration block —
+  // and then it is explicitly flagged via coherenceCalibrated=false.
+  const coherenceCalibrated = hCalibrated !== null;
+  const coherenceIndex = hCalibrated !== null ? Math.round(hCalibrated * 100 * 10) / 10
+    : typeof rawFusion.coherenceIndex === "number" ? rawFusion.coherenceIndex
     : typeof rawFusion.coherence_index === "number" ? rawFusion.coherence_index
     : realCoherence01 !== null ? Math.round((realCoherence01 <= 1 ? realCoherence01 * 100 : realCoherence01) * 10) / 10
     : 0;
+
+  // Signal level: how VISIBLE the West-Ost congruence pattern is, i.e. how
+  // far the raw harmony sits from the engine's random baseline, in baseline
+  // sigmas. z = (h_raw - h_baseline) / h_sigma; the |z| buckets pin >=
+  // semantics: |z| < 1 -> leise, 1 <= |z| < 2 -> spuerbar, |z| >= 2 ->
+  // dominant. This is NOT a tension quality — +1σ means MORE harmonic than
+  // random, not "more tense". True tension intensity will derive from the
+  // per-element differences in the upcoming Spannungsnavigator.
+  let signalLevel: "leise" | "spuerbar" | "dominant" | null = null;
+  const hRaw = calibration && typeof calibration.h_raw === "number" ? calibration.h_raw : realCoherence01;
+  const hBaseline = calibration && typeof calibration.h_baseline === "number" ? calibration.h_baseline : null;
+  const hSigma = calibration && typeof calibration.h_sigma === "number" && calibration.h_sigma > 0 ? calibration.h_sigma : null;
+  if (hRaw !== null && hBaseline !== null && hSigma !== null) {
+    const z = Math.abs((hRaw - hBaseline) / hSigma);
+    signalLevel = z < 1 ? "leise" : z < 2 ? "spuerbar" : "dominant";
+  } else if (hCalibrated !== null) {
+    // HONEST APPROXIMATION: the response carried h_calibrated but no usable
+    // baseline std (h_sigma), so no z-score is computable. We derive the
+    // level from h_calibrated thirds instead (<0.33 leise, <0.66 spuerbar,
+    // else dominant) — a coarse bucketing, not a statistical statement.
+    signalLevel = hCalibrated < 0.33 ? "leise" : hCalibrated < 0.66 ? "spuerbar" : "dominant";
+  }
 
   // Custom label rating
   let coherenceRating = "Harmonische Ausgewogenheit";
@@ -547,15 +589,56 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
   if (harmonyObj && typeof harmonyObj.interpretation === "string" && harmonyObj.interpretation) {
     coherenceRating = harmonyObj.interpretation;
   }
+  // The engine's calibrated interpretation_band beats the raw-harmony
+  // interpretation — it belongs to the value we actually display.
+  if (calibration && typeof calibration.interpretation_band === "string" && calibration.interpretation_band) {
+    coherenceRating = calibration.interpretation_band;
+  }
+
+  // REAL elemental_comparison: { Holz: { western, bazi, difference }, ... } —
+  // the per-element West-vs-BaZi weights the harmony is computed from.
+  const ELEMENT_ORDER = [ElementType.WOOD, ElementType.FIRE, ElementType.EARTH, ElementType.METAL, ElementType.WATER];
+  const rawComparison = rawFusion.elemental_comparison && typeof rawFusion.elemental_comparison === "object" && !Array.isArray(rawFusion.elemental_comparison)
+    ? rawFusion.elemental_comparison : null;
+  const elementalComparison = rawComparison
+    ? ELEMENT_ORDER.flatMap((el) => {
+        const entry = rawComparison[el];
+        if (!entry || typeof entry !== "object") return [];
+        const western = typeof entry.western === "number" && Number.isFinite(entry.western) ? entry.western : null;
+        const bazi = typeof entry.bazi === "number" && Number.isFinite(entry.bazi) ? entry.bazi : null;
+        if (western === null || bazi === null) return [];
+        const difference = typeof entry.difference === "number" && Number.isFinite(entry.difference)
+          ? entry.difference
+          : Math.round((western - bazi) * 1000) / 1000;
+        return [{ element: el as string, western, bazi, difference }];
+      })
+    : [];
+
+  // Top signals are DERIVED from server data only (the two largest West/Ost
+  // differences = "größte Spannungsfelder"), or passed through from a legacy
+  // payload. The previous hardcoded default reading every user saw the same
+  // invented "Sonne-Tagesmeister Interferenz" is gone for good.
+  const derivedTopSignals = [...elementalComparison]
+    .sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference))
+    .slice(0, 2)
+    .map((c) => ({
+      trigger: `${c.element}: West ${c.western.toFixed(2)} vs. BaZi ${c.bazi.toFixed(2)}`,
+      interpretation: c.difference >= 0
+        ? `Größtes Spannungsfeld im Element ${c.element}: Die westliche Chart gewichtet ${c.element} um ${Math.abs(c.difference).toFixed(2)} stärker als die BaZi-Struktur.`
+        : `Größtes Spannungsfeld im Element ${c.element}: Die BaZi-Struktur gewichtet ${c.element} um ${Math.abs(c.difference).toFixed(2)} stärker als die westliche Chart.`
+    }));
 
   const fusion = {
     coherenceIndex,
+    coherenceCalibrated,
+    signalLevel,
     coherenceRating: rawFusion.coherenceRating || coherenceRating,
-    coherenceExplanation: "Der Kohärenzindex ist kein moralisches Qualitätsurteil (kein Gut-Schlecht-Wert), sondern drückt das mathematische Resonanzmaß zwischen den westlichen Ekliptik-Signalen, der ostasiatischen BaZi-Struktur und der Wu-Xing-Verteilung aus.",
+    coherenceExplanation: coherenceCalibrated
+      ? "Kalibrierte Strukturkongruenz: Der rohe Resonanzwert wird gegen eine Zufallsbaseline kalibriert — angezeigt wird, wie deutlich Ihre West-Ost-Struktur über zufälliger Übereinstimmung liegt. Kein moralisches Qualitätsurteil (kein Gut-Schlecht-Wert)."
+      : "Der Kohärenzindex ist kein moralisches Qualitätsurteil (kein Gut-Schlecht-Wert), sondern drückt das mathematische Resonanzmaß zwischen den westlichen Ekliptik-Signalen, der ostasiatischen BaZi-Struktur und der Wu-Xing-Verteilung aus.",
     systemBridge: rawFusion.systemBridge || `Ihre energetische Konfiguration spannt eine Brücke zwischen dem westlichen Tierkreiszeichen ${sunSign} und dem BaZi-Tagesmeister ${baziDayMaster.name} (${dmElement}).`,
-    topSignals: rawFusion.topSignals || [
-      { trigger: "Sonne-Tagesmeister Interferenz", interpretation: "Ihre westliche Kernpersönlichkeit harmoniert direkt mit der ostasiatischen Stamm-Schwingung." }
-    ],
+    elementalComparison,
+    topSignals: Array.isArray(rawFusion.topSignals) ? rawFusion.topSignals : derivedTopSignals,
     // New required fields
     label: rawFusion.label || coherenceRating,
     explanation: "Der Kohärenzindex ist kein Gut-Schlecht-Wert, sondern ein Resonanzmaß zwischen westlichen Signalen, BaZi-Struktur und Wu-Xing-Verteilung.",
@@ -564,10 +647,15 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
     wuxingContributors: rawFusion.wuxingContributors || (wuxingAvail ? sortedWuXing.slice(0, 2).map(([el, pct]) => `${el} (${pct}%)`) : []),
     supports: rawFusion.supports || [ `${maxElement} stärkt Willenskraft`, "Häuser-Trigon-Harmonien" ],
     frictions: rawFusion.frictions || [ `Mangel an ${minElement} drosselt Fluss`, "Quadrat-Aspekte erfordern Reflexion" ],
-    integrationText: rawFusion.integrationText
-      || (typeof rawFusion.fusion_interpretation === "string" && rawFusion.fusion_interpretation
+    // The "Fusions-Deutung der Engine" section shows ONLY real engine text
+    // (fusion_interpretation) or a legacy passthrough. Absent text -> null ->
+    // the section stays hidden. NO invented fallback sentence — that would be
+    // local copy masquerading as engine output.
+    integrationText: typeof rawFusion.integrationText === "string" && rawFusion.integrationText
+      ? rawFusion.integrationText
+      : typeof rawFusion.fusion_interpretation === "string" && rawFusion.fusion_interpretation
         ? rawFusion.fusion_interpretation
-        : "Durch das Erkennen dieser kosmischen Strömungen verschmelzen beide Philosophien im Alltag."),
+        : null,
     source: sectionSource(Boolean(raw.fusion))
   };
 
