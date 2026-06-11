@@ -341,3 +341,45 @@ describe("B-007 Pinning: Aszendent/Mond/Haus-Texte kreuzen sich nie", () => {
     if (asc) expect(asc.sign).toBe(v.western.ascendant);
   });
 });
+
+describe("A14 — DAY_MASTER_TEXTS element-spezifische Fallback-Texte", () => {
+  const INPUT = {
+    name: "Test", birthDate: "1990-01-01", birthTime: "12:00",
+    birthPlace: "Berlin", birthPlaceLabel: "Berlin", placeId: "p1", gender: "Divers" as const
+  };
+
+  it("METAL-Tagesmeister (Xin) liefert Metall-Modell-Text (kein 'Ausgewogenheit')", () => {
+    const fullRaw = {
+      western: westernFixture, bazi: baziFixture, wuxing: wuxingFixture, fusion: fusionFixture
+    };
+    const vm = normalizeFuFireProfile(fullRaw, INPUT, "fufire-chart");
+    expect(vm.bazi.dayMaster.element).toBe(ElementType.METAL);
+    expect(vm.bazi.dayMaster.strengths).toContain("Im BaZi-Modell");
+    expect(vm.bazi.dayMaster.strengths).not.toBe("Ausgewogenheit, Feinfühligkeit");
+    expect(vm.bazi.dayMaster.strengths).toContain("Klarheit");
+    expect(vm.bazi.dayMaster.shadow).toContain("Im BaZi-Modell");
+    expect(vm.bazi.dayMaster.coreInterpretation).toContain("im BaZi-Modell");
+  });
+
+  it.each([
+    ["Holz", ElementType.WOOD, "Wachstumsorientierung"],
+    ["Feuer", ElementType.FIRE, "Ausdrucksstärke"],
+    ["Erde", ElementType.EARTH, "Verlässlichkeit"],
+    ["Metall", ElementType.METAL, "Klarheit"],
+    ["Wasser", ElementType.WATER, "Anpassungsfähigkeit"],
+  ])("Element %s → strengths enthält '%s'", (_label, element, keyword) => {
+    const rawWithElement = { bazi: { dayMaster: element } };
+    const vm = normalizeFuFireProfile(rawWithElement, INPUT, "fufire-chart");
+    expect(vm.bazi.dayMaster.element).toBe(element);
+    expect(vm.bazi.dayMaster.strengths).toContain(keyword);
+    expect(vm.bazi.dayMaster.strengths).toContain("Im BaZi-Modell");
+    expect(vm.bazi.dayMaster.shadow).toContain("Im BaZi-Modell");
+    expect(vm.bazi.dayMaster.coreInterpretation).toContain("im BaZi-Modell");
+  });
+
+  it("Engine-Wert rawBazi.strengths hat Vorrang vor DAY_MASTER_TEXTS", () => {
+    const rawWithCustom = { bazi: { dayMaster: ElementType.FIRE, strengths: "Direkter Engine-Wert" } };
+    const vm = normalizeFuFireProfile(rawWithCustom, INPUT, "fufire-chart");
+    expect(vm.bazi.dayMaster.strengths).toBe("Direkter Engine-Wert");
+  });
+});
