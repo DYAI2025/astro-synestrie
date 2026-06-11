@@ -304,3 +304,40 @@ describe("normalizer degrades per-section instead of throwing", () => {
     expect(vm.fusion.coherenceCalibrated).toBe(false);
   });
 });
+
+describe("B-007 Pinning: Aszendent/Mond/Haus-Texte kreuzen sich nie", () => {
+  const vm = () => normalizeFuFireProfile({ western: westernFixture }, INPUT, "fufire-orchestrated");
+
+  it("Aszendent (→ Waage) und Mond (→ Fische) sind getrennt und korrekt", () => {
+    const v = vm();
+    expect(v.western.ascendant).toBe("Waage");
+    expect(v.western.moonSign).toBe("Fische");
+    expect(v.western.ascendant).not.toBe(v.western.moonSign);
+  });
+
+  it("der Mond steht per Server-Cusps in Haus 5 — NIE pauschal in Haus 1", () => {
+    const moon = vm().western.planets.find((p) => p.name === "Mond")!;
+    expect(moon.sign).toBe("Fische");
+    expect(moon.house).toBe(5);
+  });
+
+  it("Haus-1-Text referenziert den Aszendenten und listet KEINEN Mond (Fixture: Haus 1 leer)", () => {
+    const h1 = vm().western.houses.find((h) => h.number === 1)!;
+    expect(h1.description).toContain("Aszendent");
+    expect(h1.signResonance).toContain("Waage");
+    expect(h1.signResonance).not.toContain("Fische");
+    expect(h1.planets).toEqual([]);
+  });
+
+  it("Haus 5 listet den Mond mit Zeichen Fische — kein Kreuz-Label-Aszendent", () => {
+    const v = vm();
+    const h5 = v.western.houses.find((h) => h.number === 5)!;
+    const moonEntry = h5.planets.find((p) => p.name === "Mond")!;
+    expect(moonEntry).toBeDefined();
+    expect(moonEntry.sign).toBe("Fische");
+    expect(h5.description).toContain("Mond (Fische)");
+    expect(h5.description).not.toContain("Aszendent");
+    const asc = v.western.planets.find((p) => p.name === "Aszendent");
+    if (asc) expect(asc.sign).toBe(v.western.ascendant);
+  });
+});
