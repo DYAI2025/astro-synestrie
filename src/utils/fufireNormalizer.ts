@@ -557,7 +557,7 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
     : typeof rawFusion.coherenceIndex === "number" ? rawFusion.coherenceIndex
     : typeof rawFusion.coherence_index === "number" ? rawFusion.coherence_index
     : realCoherence01 !== null ? Math.round((realCoherence01 <= 1 ? realCoherence01 * 100 : realCoherence01) * 10) / 10
-    : 0;
+    : null;
 
   // Signal level: how VISIBLE the West-Ost congruence pattern is, i.e. how
   // far the raw harmony sits from the engine's random baseline, in baseline
@@ -581,9 +581,10 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
     signalLevel = hCalibrated < 0.33 ? "leise" : hCalibrated < 0.66 ? "spuerbar" : "dominant";
   }
 
-  // Custom label rating
+  // Custom label rating — NIE aus einem fehlenden Wert ableiten (null < 60 wäre sonst true).
   let coherenceRating = "Harmonische Ausgewogenheit";
-  if (coherenceIndex > 80) coherenceRating = "Exzellente System-Resonanz";
+  if (coherenceIndex === null) coherenceRating = "Keine Kohärenz-Daten verfügbar";
+  else if (coherenceIndex > 80) coherenceRating = "Exzellente System-Resonanz";
   else if (coherenceIndex < 60) coherenceRating = "Spannungsgeladene Dynamik";
   // The engine's own interpretation beats any locally derived label.
   if (harmonyObj && typeof harmonyObj.interpretation === "string" && harmonyObj.interpretation) {
@@ -770,9 +771,7 @@ export function getRawSimulatedProfileFromLocal(birthData: any) {
     wuxing: {
       wu_xing_vector: chart.bazi.wuXing
     },
-    fusion: {
-      coherenceIndex: 75
-    }
+    fusion: {}
   };
 }
 

@@ -281,6 +281,26 @@ describe("normalizer degrades per-section instead of throwing", () => {
       "fufire-orchestrated"
     );
     expect(vm.western.planets).toEqual([]);
-    expect(vm.fusion.coherenceIndex).toBe(0);
+    expect(vm.fusion.coherenceIndex).toBeNull();
+  });
+
+  it("liefert coherenceIndex null, wenn weder Kalibrierung noch Legacy-Wert existieren (B-002)", () => {
+    const vm = normalizeFuFireProfile(
+      { fusion: { calibration: { h_raw: 0.5, h_baseline: 0.25, h_sigma: 0.25 } } },
+      INPUT, "fufire-orchestrated"
+    );
+    expect(vm.fusion.coherenceIndex).toBeNull();
+    expect(vm.fusion.coherenceCalibrated).toBe(false);
+    expect(vm.fusion.signalLevel).toBe("spuerbar");
+    expect(vm.fusion.coherenceRating).toBe("Keine Kohärenz-Daten verfügbar");
+  });
+
+  it("lokaler Fallback erfindet keine 75 mehr (B-002)", async () => {
+    const { getRawSimulatedProfileFromLocal } = await import("./fufireNormalizer");
+    const raw = getRawSimulatedProfileFromLocal({ birthDate: "1990-06-15", birthTime: "14:30", name: "X" } as any);
+    expect((raw.fusion as any)?.coherenceIndex).toBeUndefined();
+    const vm = normalizeFuFireProfile(raw, INPUT, "fallback-local");
+    expect(vm.fusion.coherenceIndex).toBeNull();
+    expect(vm.fusion.coherenceCalibrated).toBe(false);
   });
 });

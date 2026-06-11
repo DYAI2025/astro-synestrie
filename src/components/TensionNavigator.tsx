@@ -608,30 +608,43 @@ function OriginLayer({ fusion }: { fusion: FusionData }) {
               {coherenceCalibrated ? "Kalibrierter Kohärenzindex" : "System-Kohärenzindex"}
             </span>
 
-            <div className="relative flex items-center justify-center">
-              <svg className="w-40 h-40 transform -rotate-90">
-                <circle cx="80" cy="80" r="70" className="stroke-stone-800" strokeWidth="8" fill="transparent" />
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
-                  className="stroke-[#D4AF37] transition-all duration-700"
-                  strokeWidth="8"
-                  fill="transparent"
-                  strokeDasharray={440}
-                  strokeDashoffset={440 - (440 * coherenceIndex) / 100}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-4xl font-serif font-bold text-gold-light tracking-tight" data-testid="fusion-coherence-value">
-                  {coherenceIndex}%
-                </span>
-                <span className="font-mono text-[8px] uppercase text-[#9A8F80] tracking-wider mt-0.5 max-w-[110px] text-center leading-snug">
-                  {coherenceCalibrated ? "kalibrierte Strukturkongruenz vs. Zufallsbaseline" : "Deckung"}
+            {coherenceIndex === null ? (
+              <div
+                className="flex flex-col items-center justify-center text-center space-y-2 py-8"
+                data-testid="fusion-coherence-missing"
+              >
+                <span className="font-serif text-xl text-stone-400">nicht verfügbar</span>
+                <span className="font-mono text-[8px] uppercase text-[#9A8F80] tracking-wider max-w-[180px] leading-snug">
+                  Die Engine lieferte keinen kalibrierten Kohärenzwert — es wird bewusst
+                  keine Zahl erfunden.
                 </span>
               </div>
-            </div>
+            ) : (
+              <div className="relative flex items-center justify-center">
+                <svg className="w-40 h-40 transform -rotate-90">
+                  <circle cx="80" cy="80" r="70" className="stroke-stone-800" strokeWidth="8" fill="transparent" />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    className="stroke-[#D4AF37] transition-all duration-700"
+                    strokeWidth="8"
+                    fill="transparent"
+                    strokeDasharray={440}
+                    strokeDashoffset={440 - (440 * coherenceIndex) / 100}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-4xl font-serif font-bold text-gold-light tracking-tight" data-testid="fusion-coherence-value">
+                    {coherenceIndex}%
+                  </span>
+                  <span className="font-mono text-[8px] uppercase text-[#9A8F80] tracking-wider mt-0.5 max-w-[110px] text-center leading-snug">
+                    {coherenceCalibrated ? "kalibrierte Strukturkongruenz vs. Zufallsbaseline" : "Deckung"}
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <h4 className="text-md font-serif font-bold text-[#E0D8D0] tracking-wide" data-testid="fusion-coherence-rating">
