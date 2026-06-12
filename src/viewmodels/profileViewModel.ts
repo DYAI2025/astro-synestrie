@@ -69,6 +69,7 @@ export interface FusionData {
   }[];
   label: string;
   explanation: string;
+  signalLevelSuffix: string | null;
   westernContributors: string[];
   baziContributors: string[];
   wuxingContributors: string[];
@@ -84,6 +85,7 @@ export interface FusionData {
 }
 
 export interface ProfileViewModel {
+  timeKnown: boolean;
   identity: {
     name: string;
     birthDate: string;
@@ -94,7 +96,9 @@ export interface ProfileViewModel {
   western: {
     sunSign: string;
     moonSign: string;
-    ascendant: string;
+    ascendant: string | null;
+    moonIsApproximate: boolean;
+    housesAvailable: boolean;
     planets: {
       name: string;
       symbol: string;
@@ -117,6 +121,7 @@ export interface ProfileViewModel {
   };
   bazi: {
     available: boolean;
+    hourAvailable: boolean;
     pillars: {
       title: string;
       pillarKey: string;

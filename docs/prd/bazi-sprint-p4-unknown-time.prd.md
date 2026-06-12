@@ -30,14 +30,14 @@ Die technische Kette: `InputForm`-Checkbox → `birthInputValidation` (Zeit opti
 **Beschreibung:**
 Vor jeder Implementierung muss das tatsächliche Verhalten der FuFirE-Engine bei `birth_time_known:false` durch Live-Calls verifiziert werden. Alle 6 Endpoints werden mit `birth_time_known:false` und Placeholder-Zeit `12:00:00` aufgerufen. Die Responses werden als JSON-Fixtures committiert. Nur wenn das Engine-Verhalten exakt zum Contract in `/Users/benjaminpoersch/Projects/FuFirE/docs/contracts/unknown-time.md` passt, darf die Implementierung fortgesetzt werden. Bei Abweichung: STOP und User-Report.
 
-Der Contract definiert:
-- `POST /v1/calculate/bazi` → 200, `precision.provisional_fields=["hour"]`
-- `POST /v1/calculate/western` → 200, `precision.provisional_fields=["ascendant","houses","mc"]`
-- `POST /v1/calculate/fusion` → 200, `precision.provisional_fields=["signature","hour","ascendant","houses"]`
-- `POST /v1/experience/bootstrap` → 200, `chart_type_quality="assumed_day"`
-- `POST /v1/experience/daily` → 200, `quality_flags.chart_type_quality="assumed_day"`
-- `POST /v1/calculate/bazi/dayun` → 200, `precision.birth_time_known=false`, `precision.provisional_fields` mit Zeit-abhängigen Dayun-Feldern
-- Fehlendes `time`-Feld → HTTP 422
+Der Contract definiert (aktualisiert nach Live-Spike 2026-06-12):
+- `POST /v1/calculate/bazi` → 200, `precision.provisional_fields=["hour"]`; `pillars.hour` ist NICHT null in der Engine-Response — Normalizer muss aus `provisional_fields` auf null setzen (F-02)
+- `POST /v1/calculate/western` → 200, `precision.provisional_fields=["ascendant","houses","mc"]`; `angles.Ascendant` ist NON-null (12:00-Wert) — Normalizer muss short-circuiten (F-01)
+- `POST /v1/calculate/fusion` → 200, `precision.provisional_fields=["signature","hour","ascendant","houses"]`; `calibration.quality="ok"` (nicht "sparse")
+- `POST /v1/experience/bootstrap` → 200; kein `chart_type_quality`-Feld auf Top-Level; `profile.ascendant_sign` ist mit 12:00-Wert befüllt ("Jungfrau" o.ä.) — Normalizer muss `profile.ascendant_sign` auf null setzen wenn `timeKnown:false`
+- `POST /v1/experience/daily` → 200, `quality_flags.chart_type_quality="assumed_day"` ✓ (funktioniert korrekt)
+- `POST /v1/calculate/bazi/dayun` → 200; Dayun degradiert NICHT bei `birth_time_known:false` — 大運 sind datumsbasiert, nicht zeitbasiert; Engine echot `precision.birth_time_known=true` (Engine-Bug, aber Verhalten korrekt); Dayun pass-through ohne Degradation
+- Fehlendes `time`-Feld: Engine akzeptiert date-only-String mit 200 (kein 422); 422-Validierung liegt im BFF, nicht Engine
 
 Zusätzlich verifizieren: Wird `hour_pillar` in der BaZi-Response tatsächlich `null`? Wird `ascendant` in der Western-Response tatsächlich `null` oder nur `provisional` markiert? Gibt Fusion `calibration.quality:"sparse"` aus? Flaggt die Engine BaZi-Tagessäulen-Mitternachts-Edge-Cases?
 
@@ -147,9 +147,15 @@ Folgende Degradationsregeln werden implementiert (Ground Truth: die in REQ-P4-00
 **westernContributors — [F-06 FIX]:**
 - `fufireNormalizer.ts` enthält einen Fallback `westernContributors: rawFusion.westernContributors || [\`Sonne in ${sunSign}\`, \`Mond in ${moonSign}\`, \`Aszendent in ${ascendant}\`]`. Wenn `timeKnown:false` und `ascendant === null`, darf der `Aszendent in ...`-Template-String nicht erscheinen. **Constraint:** wenn `provisional_fields` enthält `"ascendant"` → `westernContributors`-Fallback ersetzt `Aszendent in ${ascendant}` durch keinen Eintrag (oder explizit `"Aszendent nicht berechenbar"`). Unit-Test verifiziert diesen Pfad.
 
-**Bootstrap/Daily:**
-- `chart_type_quality === "assumed_day"` → ViewModel-Feld `chartQuality: "assumed_day"` setzen (für UI-Hinweis verwendbar).
-- `quality_flags.chart_type_quality` auf `DailyResponse` ist das kanonische Signal (top-level `chart_type_quality` deprecated — Consumer liest `quality_flags.chart_type_quality`).
+**Bootstrap — [F-05 FIX — Spike-Befund 2026-06-12]:**
+- `bootstrap.profile.ascendant_sign` ist mit 12:00-berechnetem Wert befüllt (z.B. "Jungfrau") auch wenn `birth_time_known:false`. Normalizer muss `profile.ascendant_sign → null` wenn `timeKnown:false`. Selbe F-01-Logik: Engine gibt Wert zurück, Normalizer nullt ihn.
+- `chart_type_quality` ist NICHT auf Top-Level in bootstrap — kein `chart_type_quality`-Gate für bootstrap.
+
+**Daily:**
+- `quality_flags.chart_type_quality === "assumed_day"` → ViewModel-Feld `chartQuality: "assumed_day"` setzen (für UI-Hinweis verwendbar). Kanonisches Signal auf Daily-Response ✓.
+
+**Dayun:**
+- Dayun-Response pass-through: keine Degradation bei `timeKnown:false`. 大運 sind datumsbasiert. Normalizer lässt Dayun unverändert.
 
 Das ViewModel trägt außerdem `timeKnown: boolean` als Top-Level-Feld, gesetzt aus dem Eingabe-Flag (nicht aus der Engine-Response).
 
