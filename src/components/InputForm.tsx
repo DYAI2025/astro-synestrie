@@ -7,6 +7,7 @@ import { ResolvedPlace } from "../api/bazodiacClient";
 interface InputFormProps {
   birthData: BirthData | null;
   onCalculate: (data: BirthData) => void;
+  timeError?: string | null;
 }
 
 const EMPTY: BirthData = {
@@ -24,7 +25,7 @@ const FIELD_CLASS =
 const LABEL_CLASS =
   "font-mono text-[10px] uppercase font-bold text-gold-muted tracking-wider flex items-center space-x-1.5 select-none mb-2";
 
-export default function InputForm({ birthData, onCalculate }: InputFormProps) {
+export default function InputForm({ birthData, onCalculate, timeError = null }: InputFormProps) {
   const [formData, setFormData] = React.useState<BirthData>({ ...EMPTY, ...(birthData || {}) });
   const [submitting, setSubmitting] = React.useState(false);
   const [timeKnown, setTimeKnown] = React.useState<boolean>(birthData?.timeKnown ?? true);
@@ -156,25 +157,17 @@ export default function InputForm({ birthData, onCalculate }: InputFormProps) {
                   disabled={!timeKnown}
                   value={timeKnown ? formData.birthTime : ""}
                   onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
-                  className={`${FIELD_CLASS} font-mono${!timeKnown ? " opacity-40 cursor-not-allowed" : ""}`}
+                  aria-invalid={!!timeError}
+                  aria-describedby={timeError ? "time-field-error" : undefined}
+                  className={`${FIELD_CLASS} font-mono`}
                 />
-                <label htmlFor="input-time-unknown" className="mt-2 flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    id="input-time-unknown"
-                    checked={!timeKnown}
-                    onChange={(e) => {
-                      const unknown = e.target.checked;
-                      setTimeKnown(!unknown);
-                      if (unknown) setFormData((prev) => ({ ...prev, birthTime: "" }));
-                    }}
-                    className="h-3.5 w-3.5 accent-[#D4AF37] cursor-pointer"
-                  />
-                  <span className="font-mono text-[10px] text-stone-400">Geburtszeit unbekannt</span>
-                </label>
-                {!timeKnown && (
-                  <p className="mt-1.5 font-mono text-[10px] text-gold-muted/70 leading-relaxed">
-                    Berechnung mit Tagesmitte (12:00); zeitabhängige Teile werden gekennzeichnet.
+                {timeError && (
+                  <p
+                    id="time-field-error"
+                    className="mt-1.5 text-[11px] text-red-400 font-sans leading-relaxed"
+                    data-testid="time-field-error"
+                  >
+                    {timeError}
                   </p>
                 )}
               </div>

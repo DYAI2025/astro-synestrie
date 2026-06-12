@@ -1,9 +1,9 @@
 # Product Canvas: BaZi Sprint P4 — Unknown Birth Time Mode
 
 **Feature-Slug:** `bazi-sprint-p4-unknown-time`
-**Status:** user-confirmed
+**Status:** draft (amended post-council — re-confirmation pending)
 **Erstellt:** 2026-06-12
-**Bestätigungsphrase:** "Canvas P4 amended bestätigt" (2026-06-12, nach Council-Amendments A/B/C)
+**Bestätigungsphrase:** (leer — erneute Bestätigung erforderlich nach Council-Amendments A/B/C)
 
 ---
 
@@ -72,7 +72,7 @@ Der Paar-Modus (Synastrie) mit einem unknown-time-Partner soll den gleichen Degr
 - Kein separater UI-Bereich oder Hinweis-Dialog außerhalb der `<TimeDependencyNote/>`-Komponente.
 - Keine Speicherung des `timeKnown`-Flags in Supabase (P3-Scope) in diesem Sprint.
 
-~~**OPEN QUESTION (OQ-P4-01):** Wird `timeKnown:false` in P3-Supabase-Profil gespeichert?~~ **SUPERSEDED durch Amendment A (user-confirmed):** `timeKnown` wird im bestehenden `birth_data`-JSONB-Blob gespeichert — kein Schema-Change, keine neue Spalte. Siehe Amendment A in Section 10.
+**OPEN QUESTION (OQ-P4-01):** Wird `timeKnown:false` in P3-Supabase-Profil gespeichert, sodass beim Laden eines gespeicherten Profils der Checkbox-Zustand wiederhergestellt wird? Der Sprint-Plan nennt dies nicht explizit. Wenn ja, ändert sich der Scope von `src/server/app.ts` und das Supabase-Schema.
 
 ## 8. Risiken / Widersprüche
 
