@@ -27,6 +27,7 @@ const LABEL_CLASS =
 export default function InputForm({ birthData, onCalculate }: InputFormProps) {
   const [formData, setFormData] = React.useState<BirthData>({ ...EMPTY, ...(birthData || {}) });
   const [submitting, setSubmitting] = React.useState(false);
+  const [timeKnown, setTimeKnown] = React.useState<boolean>(birthData?.timeKnown ?? true);
 
   const placeResolved = Boolean(
     formData.placeId &&
@@ -38,7 +39,7 @@ export default function InputForm({ birthData, onCalculate }: InputFormProps) {
   const canSubmit =
     formData.name.trim().length >= 2 &&
     Boolean(formData.birthDate) &&
-    Boolean(formData.birthTime) &&
+    (timeKnown ? Boolean(formData.birthTime) : true) &&
     placeResolved;
 
   const handleResolved = (place: ResolvedPlace) => {
@@ -61,7 +62,7 @@ export default function InputForm({ birthData, onCalculate }: InputFormProps) {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
-    onCalculate(formData);
+    onCalculate({ ...formData, timeKnown });
     setTimeout(() => setSubmitting(false), 600);
   };
 
@@ -151,11 +152,31 @@ export default function InputForm({ birthData, onCalculate }: InputFormProps) {
                 <input
                   id="input-time"
                   type="time"
-                  required
-                  value={formData.birthTime}
+                  required={timeKnown}
+                  disabled={!timeKnown}
+                  value={timeKnown ? formData.birthTime : ""}
                   onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
-                  className={`${FIELD_CLASS} font-mono`}
+                  className={`${FIELD_CLASS} font-mono${!timeKnown ? " opacity-40 cursor-not-allowed" : ""}`}
                 />
+                <label htmlFor="input-time-unknown" className="mt-2 flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    id="input-time-unknown"
+                    checked={!timeKnown}
+                    onChange={(e) => {
+                      const unknown = e.target.checked;
+                      setTimeKnown(!unknown);
+                      if (unknown) setFormData((prev) => ({ ...prev, birthTime: "" }));
+                    }}
+                    className="h-3.5 w-3.5 accent-[#D4AF37] cursor-pointer"
+                  />
+                  <span className="font-mono text-[10px] text-stone-400">Geburtszeit unbekannt</span>
+                </label>
+                {!timeKnown && (
+                  <p className="mt-1.5 font-mono text-[10px] text-gold-muted/70 leading-relaxed">
+                    Berechnung mit Tagesmitte (12:00); zeitabhängige Teile werden gekennzeichnet.
+                  </p>
+                )}
               </div>
 
               <div className="sm:col-span-2">
