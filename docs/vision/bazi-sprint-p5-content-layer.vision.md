@@ -1,7 +1,8 @@
 # Product Vision: BaZi Sprint P5 — Content-Layer (Erklärlayer, Häuser- & Säulen-Vertiefung)
 
 **Feature-Slug:** `bazi-sprint-p5-content-layer`
-**Status:** draft
+**Status:** user-confirmed
+**Confirmed by user:** yes — "GO" (2026-06-13, Vision-GO-Gate)
 **Erstellt:** 2026-06-13
 **Canvas-Link:** [docs/canvas/bazi-sprint-p5-content-layer.canvas.md](../canvas/bazi-sprint-p5-content-layer.canvas.md) (Status: user-confirmed, v2 re-bestätigt 2026-06-13 post-Council)
 **PRD-Link:** [docs/prd/bazi-sprint-p5-content-layer.prd.md](../prd/bazi-sprint-p5-content-layer.prd.md)
