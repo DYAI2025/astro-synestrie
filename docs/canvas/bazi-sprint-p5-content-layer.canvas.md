@@ -15,14 +15,24 @@ Phase-0.16-Challenge-Council (Challenger/Advisor/Critic) lief auf der bestätigt
 Folgende Punkte hat der **User** adoptiert (Council schlägt vor, nur User reklassifiziert);
 die v1-Bestätigung verfällt, bis der User v2 re-bestätigt.
 
-- **A — Hidden-Stems (vom Advisor code-verifiziert):** `profileViewModel.ts:137` deklariert
-  `hiddenStems: string[]`, aber `fufireNormalizer.ts:442,492` liest `branch.hiddenStems || []`
-  aus einem Payload **ohne diesen Key**, und **kein Fixture** trägt einen nicht-leeren Wert.
-  → Task 5 würde für jeden echten Nutzer eine leere Hidden-Stems-Liste rendern (grün getestet,
-  leer in Prod). **Adoptiert:** Task 1 verifiziert `pillars[].hiddenStems.length > 0` gegen eine
-  **echte Engine-Antwort**, BEVOR ein Hidden-Stems-Text geschrieben wird. Ist sie leer → als
-  MISSING in `content-sources.md` führen und die Hidden-Stems-**UI** auf einen Engine-Sprint
-  vertagen; Stamm-/Zweig-/Säulen-Texte liefern trotzdem (nur ohne Hidden-Stems-Liste).
+- **A — Hidden-Stems — KORRIGIERT (2026-06-13, Spec-Audit Phase 0.7, BLOCKER-1):**
+  ⚠️ Die Council-v2-Prämisse („leer in Prod; Normalizer liest einen nicht-existenten Key;
+  Task 5 rendert leere Liste") war eine **Konfabulation** des Advisors und ist **FALSCH** —
+  vom Spec-Auditor widerlegt, vom Orchestrator gegen den Code direkt verifiziert.
+  **Wahrer Befund (belegt):** `fufireNormalizer.ts:458-460` löst den Zweig über
+  `EARTHLY_BRANCHES[branch_index]` / `lookupBranch(zweig|branch)` auf; `astrology.ts:30-41`
+  trägt für **alle 12 Zweige** befüllte `hiddenStems`; `:466/:492` spreaden den **aufgelösten
+  kanonischen** Zweig, `|| []` greift nur beim echt-unauflösbaren `defaultBranch` (`:442`).
+  Der Live-Fixture `bazi.json` trägt `branch_index`/`zweig` (echte Engine liefert Zweig-IDs);
+  ein **bestehender** Test `fufireNormalizer.realshapes.test.ts:103` assertet bereits
+  `day.hiddenStems.length > 0`, und `BaZiDetail.tsx:163` **rendert sie bereits**.
+  → **Hidden-Stems funktioniert heute in Prod. Kein Defer, keine MISSING-Pflicht, keine
+  Task-1-„verify-or-defer"-Gate für ein Feature, das schon läuft.**
+  **Korrigierte Disziplin (bleibt sinnvoll):** P5-T5 baut auf den vorhandenen Daten auf und
+  zitiert die bestehende Real-Daten-Assertion (`realshapes.test.ts:103`) als Beleg; die
+  ehrliche Empty-State-Regel gilt **nur** für den genuin unauflösbaren `defaultBranch`-Fall
+  (dann KEIN leerer Container). Lehre: eine Code-Behauptung des Councils musste das nächste,
+  unabhängige Gate überleben — hat sie nicht; genau so soll Defense-in-Depth wirken.
 - **B — Engagement-Signal (Challenger + Critic, unabhängig):** alle Erfolgssignale waren
   test-grün; nichts misst, ob Karten geklickt werden. **Adoptiert:** ein leichtes
   `card_click`/`layer_open`-Analytics-Event in Task 3 + ein Verhaltens-Smoke-Ziel
@@ -75,7 +85,7 @@ Kein Workaround vorhanden. Nutzerinnen verlassen die App oder öffnen eine exter
 5. `npm run lint && npm test && npm run build && npx playwright test` — Zahlen vorher/nachher, keine Regressionen, P1-Regressionstests bleiben grün.
 6. Live-Smoke mit Screenshot zweier geöffneter Layer nach Deploy.
 7. `docs/contracts/content-sources.md` existiert (Task 1 Output: Tabelle Content-Typ → Quelldatei → Qualität).
-8. **(Amendment A)** Task 1 hält schriftlich fest: liefert eine **echte** Engine-Antwort `pillars[].hiddenStems` mit Länge > 0? Falls nein → Hidden-Stems als MISSING geführt und die Hidden-Stems-UI vertagt (kein leeres Listen-Rendering in Prod).
+8. **(Amendment A — KORRIGIERT)** Hidden-Stems funktioniert bereits: P5-T5 baut darauf auf, und der **bestehende** Test `fufireNormalizer.realshapes.test.ts:103` (`day.hiddenStems.length > 0`, gegen Live-Fixture) bleibt grün; `BaZiDetail.tsx:163` rendert weiterhin. Ehrlicher Empty-State nur für den unauflösbaren `defaultBranch`-Fall (kein leerer Container). KEIN Defer, KEINE MISSING-Pflicht.
 9. **(Amendment B)** `card_click`/`layer_open`-Event feuert beim Öffnen eines Layers; Beta-Smoke zeigt ≥1 Layer-Open. Engagement-Signal hat einen benannten Owner.
 
 ## 6. Kern-Use-Case
@@ -103,7 +113,7 @@ Die Nutzerin wechselt nach dem Lesen des Layers in den BaZi-Tab und findet dort 
 - **GRÖSSTES RISIKO — Text-Qualität:** 55 Texte à ~90 Wörter sind der größte Einzelaufwand des Sprints. Der Review-Agent (Master §6) MUSS alle Registry-Texte vollständig lesen (Stilregeln + fachliche Plausibilität). Bei vorhandenen Astro-Noctum-Quelltexten gilt: 1:1 übernehmen schlägt Umformulieren. Kein Text wird „aus dem Kopf" des Executors übernommen, ohne ihn als `curated` zu markieren.
 - **Quell-Pfade unverifiedt:** Die Astro-Noctum-Kandidaten-Pfade in Task 1 sind Suchvorschläge — der Executor MUSS die Pfade vor jedem Portieren verifizieren (`grep -rln`). Falls Quelltexte nicht gefunden werden, ist Kuratierung Pflicht; fehlt ein ganzer Domänen-Typ, ist das als MISSING in `docs/contracts/content-sources.md` festzuhalten. **OPEN QUESTION:** Liegen Erdzweig- und Häuser-Texte in Astro-Noctum vollständig vor? (Task 1 klärt das — vor Task 2/3 obligatorisch.)
 - **P4-Abhängigkeit (Aszendent null):** P5 kann parallel zu P4 entwickelt werden. ExplanationLayer braucht nur einen Null-Check (`if (viewModel.western.ascendant === null)`). Kein Blocker, aber der e2e-Test für den null-Aszendent-Layer setzt P4-Fixture voraus.
-- **BaZi-ViewModel-Felder (Hidden Stems) — VOM COUNCIL CODE-VERIFIZIERT (Amendment A):** `profileViewModel.ts:137` deklariert `hiddenStems: string[]`, aber `fufireNormalizer.ts:442,492` liest `branch.hiddenStems || []` aus einem Payload **ohne diesen Key**; **kein Fixture** trägt einen nicht-leeren Wert. Status der OPEN QUESTION: **in aktuellem Code = immer leer.** Auflösung (User-adoptiert): Task 1 prüft `pillars[].hiddenStems.length > 0` gegen eine **echte** Engine-Antwort, bevor Hidden-Stems-Texte entstehen; leer → MISSING + UI vertagen. NIE als Assumption forwarden, NIE eine leere Liste in Prod rendern.
+- **BaZi-ViewModel-Felder (Hidden Stems) — KORRIGIERT (Spec-Audit BLOCKER-1, 2026-06-13):** Die frühere v2-Behauptung „in aktuellem Code = immer leer" war FALSCH (Advisor-Konfabulation, vom Auditor widerlegt + vom Orchestrator code-verifiziert). Tatsächlich: `fufireNormalizer.ts:458-460` löst den Zweig aus `EARTHLY_BRANCHES`/`lookupBranch` auf, `astrology.ts:30-41` hat `hiddenStems` für alle 12 Zweige, `:492` spreadet den aufgelösten Zweig (`|| []` nur bei `defaultBranch`). Bewiesen durch den bestehenden Test `realshapes.test.ts:103` + Render in `BaZiDetail.tsx:163`. → Kein Risiko, kein Defer. Restrisiko nur: ehrlicher Empty-State beim unauflösbaren `defaultBranch` (kein leerer Container).
 - **Anti-Reifikation nur Regex-tief (Amendment D):** 55 persönlichkeitsnahe Absätze sind die dichteste Fläche für weich-deterministische Formulierungen („prägt dich", „bestimmt dich"), die die Literal-Token-Regex NICHT fängt. Der Review-Agent prüft jeden Text semantisch gegen verbotene *Bedeutung*, nicht nur Wörter.
 - **Astro-Noctum-Deckung als Pivot-Trigger (Amendment E):** fehlen für ≥2 ganze Domänen Quelltexte, wird der Sprint still zu „Executor kuratiert 50 Texte aus dem Kopf" = Erfind-durch-Umlabeln. Task 1 eskaliert diesen Fall an den User („nicht wie spezifiziert fortfahren"), statt ihn zu verschlucken.
 - **Konsistenz chinesischer Tabellen:** Registry darf keine Astro-Logik duplizieren — IDs müssen mit `HEAVENLY_STEMS`/`EARTHLY_BRANCHES` in `src/utils/` übereinstimmen. Diakritik-Toleranz (Pinyin mit/ohne Diakritika) ist bereits in `src/utils/` vorhanden; Registry nutzt diese Mapping-Logik, schreibt sie nicht neu.
@@ -114,7 +124,7 @@ Die Nutzerin wechselt nach dem Lesen des Layers in den BaZi-Tab und findet dort 
 
 **Explicit** (Sprint-Plan P5, Tasks 1–6):
 - Task 1: `docs/contracts/content-sources.md` mit Quell-Mapping-Tabelle (Content-Typ → Datei → Qualität vollständig/lückenhaft/fehlt) als Pflicht-Gate vor Task 2.
-- Task 1: Verifizierter Befund zu Hidden-Stems-Feldern im ViewModel (schriftlich im contracts-Dokument oder als Kommentar im PR). **(Amendment A)** Konkret: Beleg, ob eine echte Engine-Antwort `pillars[].hiddenStems` mit Länge > 0 liefert; falls leer → MISSING-Eintrag + Vertagung der Hidden-Stems-UI dokumentiert.
+- Task 1: **(Amendment A — KORRIGIERT)** Hidden-Stems ist bereits funktional (belegt: `realshapes.test.ts:103` + `BaZiDetail.tsx:163` + kanonische `EARTHLY_BRANCHES.hiddenStems`). Evidenz = bestehender Test bleibt grün; KEIN MISSING/Defer nötig. Restpflicht: P5-T5 zitiert diesen Test + behandelt nur den unauflösbaren `defaultBranch`-Fall als Empty-State.
 - Task 1: **(Amendment E)** Astro-Noctum-Deckungsbefund je Domäne; bei ≥2 fehlenden Domänen User-Eskalation statt stiller Kuratierung.
 - Task 3: **(Amendment B)** Nachweis, dass `card_click`/`layer_open` feuert (Test/Smoke); Owner des Engagement-Signals benannt.
 - Task 2: TDD-Beweise (RED/GREEN) für `registry.test.ts` je Domänen-Datei; Wortanzahl-Check-Output.
