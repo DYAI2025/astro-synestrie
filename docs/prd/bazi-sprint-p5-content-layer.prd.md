@@ -28,7 +28,7 @@ P5 macht jede Overview-Karte klickbar. Ein Klick öffnet einen `<ExplanationLaye
 
 ## Anforderungen (REQs)
 
-### REQ-P5-001 — Quell-Exploration: content-sources.md als Pflicht-Gate vor jedem Text (Astro-Noctum-Deckung + Pivot-Gate, Amendment E)
+### REQ-P5-001 — Quell-Exploration: content-sources.md als Pflicht-Gate vor jedem Text (Astro-Noctum-Deckung + Quell-Posture, Amendment E)
 
 **Beschreibung:**
 Vor JEDEM Registry-Text wird die Astro-Noctum-Quelldeckung verifiziert. Der Executor verifiziert die Kandidaten-Pfade aus dem Plan (READ-ONLY: `/Users/benjaminpoersch/Projects/codebase/Bazodiac-WebApp/Astro-Noctum` und `/Users/benjaminpoersch/Projects/Astro-Noctum`) per `grep -rln` — niemals werden Pfade als Premisse angenommen, ohne sie gegen die reale Datei zu prüfen. Output ist `docs/contracts/content-sources.md`: Tabelle Content-Typ → gefundene Quelldatei(en) → Qualität (`vollständig | lückenhaft | fehlt`). Für FEHLENDE Typen gilt Kuratierungs-Pflicht (`source:"curated"`); kein Text wird „aus dem Kopf" übernommen, ohne als `curated` markiert zu sein.
@@ -316,7 +316,7 @@ Abschluss-Gate: `npm run lint && npm test && npm run build && npx playwright tes
 
 - Alle Implementierungen nutzen die bestehende Tech-Stack-Kette (React 19 + Vite + TS + Express BFF). Keine neuen `npm install`-Abhängigkeiten. Ein etwaiger Bedarf wäre explizit zu begründen und vom User zu bestätigen (sonst BLOCKER).
 
-### NFR-06 — Astro-Noctum READ-ONLY + Pivot-Gate (Amendment E)
+### NFR-06 — Astro-Noctum READ-ONLY + Quell-Posture (Amendment E)
 
 - Die Astro-Noctum-Repos (`/Users/benjaminpoersch/Projects/codebase/Bazodiac-WebApp/Astro-Noctum`, `/Users/benjaminpoersch/Projects/Astro-Noctum`) sind READ-ONLY: nur lesen/portieren, NIE committen.
 - Quell-Pfade werden vor jedem Portieren per `grep -rln` verifiziert (kein angenommener Pfad als Premisse).
@@ -444,7 +444,7 @@ Nur diese Dateien dürfen in P5 geändert oder neu erstellt werden:
 | **B — Engagement-Signal** | REQ-P5-009 (eigene REQ; card_click/layer_open + Beta-Smoke ≥1 + Owner); NFR-04 |
 | **C — Scope (55 in einem PR)** | NFR-08; REQ-P5-010 (Akzeptanzkriterium Default vs. Split-Ventil) |
 | **D — Anti-Reifikation semantisch** | NFR-01 (semantische + Regex-Schicht); REQ-P5-002 |
-| **E — Astro-Noctum-Pivot-Gate** | REQ-P5-001 (Pivot-Gate ≥2 Domänen → Eskalation); NFR-06 |
+| **E — Astro-Noctum-Quell-Posture** | REQ-P5-001 (fehlende Domänen → kuratieren, `source:curated` + Sign-off + PR-Review); NFR-06 |
 
 ---
 
@@ -453,7 +453,7 @@ Nur diese Dateien dürfen in P5 geändert oder neu erstellt werden:
 **Diese PRD bleibt `draft`, bis die folgenden product-kritischen Punkte mit dem User geklärt sind (Gap-Regel: keine eigene Vermutung, kein stilles ASSUMPTION):**
 
 1. **REQ-P5-009 — Owner des Engagement-Signals: GELÖST.** Owner = **Benjamin** (User-bestätigt 2026-06-13).
-2. **REQ-P5-001 — Astro-Noctum-Pivot-Gate (kein PRD-Blocker, aber Phase-1-Vorbehalt, LIVE):** Ob Astro-Noctum für ≥2 ganze Domänen Quelltexte fehlen (Amendment E), ist Task-1-Exploration und darf NICHT vorab geraten werden — bei ≥2 fehlenden Domänen STOP + User-Eskalation. Vorläufige Read-Only-Recon deutet darauf hin, dass Häuser keine Quellprosa und mehrere Domänen nur Code-Tabellen haben könnten → das Gate ist live und bleibt bestehen; Coverage wird NICHT als gegeben angenommen. *(Hinweis: Das frühere Hidden-Stems-Real-Engine-Gate (Amendment A) ist AUFGELÖST — Code-Re-Verifikation belegt, dass Hidden-Stems aus der kanonischen Tabelle nicht-leer geliefert werden, siehe REQ-P5-007. Es ist kein offener Vorbehalt mehr.)*
+2. **REQ-P5-001 — Astro-Noctum-Quell-Posture (GELÖST per User-Entscheidung 2026-06-13):** Fehlende Quelltexte (auch ≥2 Domänen) → KURATIEREN statt Stoppen; jede kuratierte Domäne in `content-sources.md` als `kuratiert` geflaggt, jeder Text `source:"curated"` + Per-Text-Semantik-Sign-off (NFR-01/D) + Benjamin-PR-Review. Task-1-Coverage wird trotzdem `grep`-verifiziert und NICHT vorab geraten; vorläufige Read-Only-Recon deutet auf Häuser ohne Quellprosa + mehrere Domänen nur als Code-Tabellen hin → Kuratierungsaufwand entsprechend hoch, aber kein Stop. *(Hinweis: Das frühere Hidden-Stems-Real-Engine-Gate (Amendment A) ist AUFGELÖST — Code-Re-Verifikation belegt, dass Hidden-Stems aus der kanonischen Tabelle nicht-leer geliefert werden, siehe REQ-P5-007.)*
 3. **Plan-Aussage „bazodiac.space hat sie live eingebunden — Benjamin bestätigt" bleibt user-attribuiert:** Diese Aussage wird NICHT als etablierte Tatsache restated, sondern als Aussage des Users geführt, bis unabhängig verifiziert.
 
 **Phase 0 ist nicht abgeschlossen, bevor diese PRD UND die Product Vision (`docs/vision/bazi-sprint-p5-content-layer.vision.md`, vom Product Owner) vom User bestätigt sind.**
@@ -462,6 +462,6 @@ Nur diese Dateien dürfen in P5 geändert oder neu erstellt werden:
 
 ## Handoff
 
-- **An `product-owner` (Vision-Gate):** PRD-Pfad `docs/prd/bazi-sprint-p5-content-layer.prd.md`; REQ-IDs REQ-P5-001…010; Akzeptanzkriterien je REQ; Non-Goals (s. o.); unresolved OPEN QUESTION (Engagement-Owner, REQ-P5-009) + live designtes Gate (Astro-Noctum-Pivot, REQ-P5-001); korrigierte Premisse (Hidden-Stems funktionieren bereits — Council-Behauptung widerlegt, REQ-P5-007); user-attribuierte Aussage (bazodiac.space live, Benjamin); customer/user (neugierige Erwachsene 25–45, Entertainment/Reflexion); Value-Claims/Erfolgssignale (s. canvas-success-signal je REQ).
+- **An `product-owner` (Vision-Gate):** PRD-Pfad `docs/prd/bazi-sprint-p5-content-layer.prd.md`; REQ-IDs REQ-P5-001…010; Akzeptanzkriterien je REQ; Non-Goals (s. o.); GELÖSTE User-Entscheidungen (Engagement-Owner = Benjamin, REQ-P5-009; Astro-Noctum-Quell-Posture = kuratieren-mit-Flag+Sign-off+PR-Review, REQ-P5-001); korrigierte Premisse (Hidden-Stems funktionieren bereits — Council-Behauptung widerlegt, REQ-P5-007); user-attribuierte Aussage (bazodiac.space live, Benjamin); customer/user (neugierige Erwachsene 25–45, Entertainment/Reflexion); Value-Claims/Erfolgssignale (s. canvas-success-signal je REQ).
 - **An `spec-auditor` (Phase 0.5) + `planner`/`tester`:** frozen PRD + Matrix nach User-Bestätigung.
 - **An `context-keeper`:** `state.md`, `decision-log.md`, ADRs konsistent zur Matrix halten (insb. ADR-Kandidat: `analytics.ts` neu vs. bestehender Mechanismus — Code-Read bestätigt: keiner vorhanden).
