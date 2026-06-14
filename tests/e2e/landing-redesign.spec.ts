@@ -61,4 +61,15 @@ test.describe("Redesign landing — FusionHero first screen", () => {
     const landing = (await page.getByTestId("landing-page").textContent()) ?? "";
     expect(landing).not.toMatch(/\bdu bist\b|garantiert|beweist deine|sagt deine zukunft voraus/i);
   });
+
+  test("mobile viewport (360px): hero, question and CTA are accessible", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/");
+    await expect(page.getByTestId("fusion-hero")).toBeVisible();
+    await expect(page.getByTestId("fusion-hero-question")).toContainText("?");
+    const cta = page.getByTestId("fusion-hero-cta");
+    await expect(cta).toBeVisible();
+    await cta.click();
+    await expect(page.locator("#input-name")).toBeVisible();
+  });
 });

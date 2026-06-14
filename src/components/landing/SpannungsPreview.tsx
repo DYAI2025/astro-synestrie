@@ -50,7 +50,7 @@ export default function SpannungsPreview({ onStart }: { onStart?: () => void }) 
           >
             Demo starten
           </button>
-          <p className="font-mono text-[9px] text-stone-500">Demo — es werden keine Daten gesendet oder gespeichert.</p>
+          <p className="font-mono text-[9px] text-stone-400">Demo — es werden keine Daten gesendet oder gespeichert.</p>
         </div>
       )}
 
@@ -107,7 +107,7 @@ export default function SpannungsPreview({ onStart }: { onStart?: () => void }) 
               </button>
             </div>
           )}
-          <p className="font-mono text-[9px] text-stone-500">Modellergebnis, keine Eigenschaft.</p>
+          <p className="font-mono text-[9px] text-stone-400">Modellergebnis, keine Eigenschaft.</p>
         </div>
       )}
     </GlassCard>

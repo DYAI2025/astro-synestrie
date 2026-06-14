@@ -93,7 +93,7 @@ export default function FusionHero({
                 Noch keine Daten — gib deine Geburtsdaten ein, dann zeigt das Modell deine erste Spannung.
               </p>
             )}
-            <p className="font-mono text-[9px] text-stone-500">Modellergebnis, keine Eigenschaft.</p>
+            <p className="font-mono text-[9px] text-stone-400">Modellergebnis, keine Eigenschaft.</p>
           </GlassCard>
         </div>
       </div>
