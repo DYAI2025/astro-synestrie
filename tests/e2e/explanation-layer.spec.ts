@@ -21,6 +21,7 @@
  * exist yet. P5-T3 implementation (NOT this spec) builds them.
  */
 import { test, expect, Page, Locator } from "@playwright/test";
+import { dismissLanding } from "./_landing";
 
 // Distinct birth date the mock recognises as the "unknown time" persona →
 // it returns a provisional ascendant so the normalizer nulls it.
@@ -42,6 +43,7 @@ async function selectBerlin(page: Page) {
 /** Submit with a known time → ascendant is computed (non-null). */
 async function reachOverview(page: Page) {
   await page.goto("/");
+  await dismissLanding(page);
   await fillNameDate(page);
   await selectBerlin(page);
   await page.fill("#input-time", "14:30");
@@ -52,6 +54,7 @@ async function reachOverview(page: Page) {
 /** Submit with the unknown-time checkbox on the NO_TIME persona → ascendant null. */
 async function reachOverviewUnknownTime(page: Page) {
   await page.goto("/");
+  await dismissLanding(page);
   await fillNameDate(page, NO_TIME_DATE);
   await selectBerlin(page);
   await page.check("#input-time-unknown");
