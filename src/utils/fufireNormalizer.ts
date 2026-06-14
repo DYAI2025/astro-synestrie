@@ -328,6 +328,17 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
         || (houseCusps ? signNameDeFromLongitude(houseCusps[0]) : null)
         || "Unbekannt");
 
+  // P7-T1: absolute ascendant longitude — ONLY from a real source, never from
+  // the sign name. Provisional (unknown birth time) short-circuits to null,
+  // same F-01 rule as `ascendant` above (never use a 12:00-computed angle).
+  const ascendantLongitude: number | null = ascendantProvisional
+    ? null
+    : (typeof angles.Ascendant === "number" && Number.isFinite(angles.Ascendant)
+        ? normalize360(angles.Ascendant)
+        : houseCusps && Number.isFinite(houseCusps[0])
+          ? normalize360(houseCusps[0])
+          : null);
+
   // Map 12 Houses (with actual missing state fallback if there is zero house data)
   // When houses are provisional (birth_time_known:false), return empty array — no 12:00-computed houses displayed.
   let houses: HouseMeaning[] = [];
@@ -760,6 +771,7 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
       sunSign,
       moonSign,
       ascendant,
+      ascendantLongitude,
       housesAvailable: !housesProvisional,
       planets,
       aspects,
