@@ -31,4 +31,16 @@ test.describe("Redesign landing — FusionHero first screen", () => {
     await expect(page.getByTestId("fusion-hero")).toBeVisible();
     await expect(page.getByTestId("fusion-hero-question")).toContainText("?");
   });
+
+  test("micro-experience demo: start → question → react → note + CTA (no identity claim)", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("spannungs-start").click();
+    await expect(page.getByTestId("spannungs-question")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId("spannungs-result")).toContainText("Spannung");
+    await page.getByTestId("spannungs-reaction-trifft").click();
+    await expect(page.getByTestId("spannungs-note")).toBeVisible();
+    await expect(page.getByTestId("spannungs-cta")).toBeVisible();
+    const txt = (await page.getByTestId("spannungs-preview").textContent()) ?? "";
+    expect(txt).not.toMatch(/du bist/i);
+  });
 });

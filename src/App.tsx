@@ -14,7 +14,7 @@ import TensionNavigator from "./components/TensionNavigator";
 import DailyPulse from "./components/DailyPulse";
 import Synastry from "./components/Synastry";
 import Methodology from "./components/Methodology";
-import FusionHero from "./components/landing/FusionHero";
+import LandingPage from "./components/landing/LandingPage";
 import { Sparkles, RefreshCw, Compass } from "lucide-react";
 
 export default function App() {
@@ -63,7 +63,7 @@ export default function App() {
 
   const renderTab = () => {
     if (activeTab === "landing") {
-      return <FusionHero onStart={() => setActiveTab("input")} />;
+      return <LandingPage onStart={() => setActiveTab("input")} />;
     }
 
     if (activeTab === "input") {
