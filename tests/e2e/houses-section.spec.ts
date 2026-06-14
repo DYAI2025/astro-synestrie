@@ -23,6 +23,7 @@
  * the rendered section.
  */
 import { test, expect, Page, Locator } from "@playwright/test";
+import { dismissLanding } from "./_landing";
 
 async function fillNameDate(page: Page, date = "1990-06-15") {
   await page.fill("#input-name", "Haus Tester");
@@ -40,6 +41,7 @@ async function selectBerlin(page: Page) {
 /** Submit the primary persona with a known time → houses are available. */
 async function reachWesternTab(page: Page): Promise<void> {
   await page.goto("/");
+  await dismissLanding(page);
   await fillNameDate(page);
   await selectBerlin(page);
   await page.fill("#input-time", "14:30");

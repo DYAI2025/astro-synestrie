@@ -18,6 +18,7 @@
  * per-pillar depth." This drives the running app + BFF + mock end-to-end.
  */
 import { test, expect, Page } from "@playwright/test";
+import { dismissLanding } from "./_landing";
 
 async function fillNameDate(page: Page, date = "1990-06-15") {
   await page.fill("#input-name", "Säulen Tester");
@@ -35,6 +36,7 @@ async function selectBerlin(page: Page) {
 /** Submit with a known time → full chart (all four pillars present). */
 async function reachOverview(page: Page) {
   await page.goto("/");
+  await dismissLanding(page);
   await fillNameDate(page);
   await selectBerlin(page);
   await page.fill("#input-time", "14:30");

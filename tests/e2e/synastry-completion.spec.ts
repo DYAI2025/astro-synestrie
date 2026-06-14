@@ -1,4 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
+import { dismissLanding } from "./_landing";
 
 const SHOT_DIR = "docs/qa/screenshots/synastry-p7";
 
@@ -38,6 +39,7 @@ async function runSynastry(page: Page) {
 
 test("score is demoted to a heuristic 'Primus-Aspectus (PA)' with a 'kein Messwert' note", async ({ page }) => {
   await page.goto("/");
+  await dismissLanding(page);
   await computeProfile(page);
   await runSynastry(page);
 
@@ -49,6 +51,7 @@ test("score is demoted to a heuristic 'Primus-Aspectus (PA)' with a 'kein Messwe
 
 test("renders the four partner-journey layers with data anchors", async ({ page }) => {
   await page.goto("/");
+  await dismissLanding(page);
   await computeProfile(page);
   await runSynastry(page);
 
@@ -79,6 +82,7 @@ test("renders the four partner-journey layers with data anchors", async ({ page 
 
 test("no forbidden relationship-verdict copy in the rendered synastry", async ({ page }) => {
   await page.goto("/");
+  await dismissLanding(page);
   await computeProfile(page);
   await runSynastry(page);
 
