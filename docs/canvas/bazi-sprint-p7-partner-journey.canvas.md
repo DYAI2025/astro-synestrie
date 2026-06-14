@@ -90,36 +90,37 @@ any new FuFirE endpoint.
 - **ungeprüft:** real couple-user engagement with a multi-section partner journey; live
   copy staying in-contract under real engine data (only unit gates exist).
 
-## 10. Allowed change scope (Phase 0.6 — fail-closed)
-```
-src/utils/interAspects.ts
-src/utils/interAspects.test.ts
-src/utils/baziCompare.ts
-src/utils/baziCompare.test.ts
-src/utils/tensionPair.ts
-src/utils/tensionPair.test.ts
-src/utils/aspectInterpretation.ts
-src/utils/aspectInterpretation.test.ts
-src/content/pairAxisTexts.ts
-src/content/pairAxisTexts.test.ts
-src/content/pairAspectTexts.ts
-src/content/pairAspectTexts.test.ts
-src/viewmodels/profileViewModel.ts
-src/utils/fufireNormalizer.ts
-src/utils/fufireNormalizer.realshapes.test.ts
-src/server/app.ts
-src/server/synastry.ts
-src/server/synastry.test.ts
-src/api/bazodiacClient.ts
-src/components/Synastry.tsx
-src/components/synastry/
-src/components/wordingHonesty.test.ts
-src/__tests__/synastryWording.test.ts
-tests/e2e/mock-fufire.mjs
-tests/e2e/synastry-completion.spec.ts
-package.json
-docs/
-```
+## 10. Allowed change scope
+
+Fail-closed (Phase 0.6). Bullet list below is the machine-parsed scope (also mirrored in
+`docs/scope/bazi-sprint-p7-partner-journey.scope.json`).
+
+- src/utils/interAspects.ts
+- src/utils/interAspects.test.ts
+- src/utils/baziCompare.ts
+- src/utils/baziCompare.test.ts
+- src/utils/tensionPair.ts
+- src/utils/tensionPair.test.ts
+- src/utils/aspectInterpretation.ts
+- src/utils/aspectInterpretation.test.ts
+- src/utils/synastry.ts
+- src/utils/synastry.test.ts
+- src/utils/fufireNormalizer.ts
+- src/utils/fufireNormalizer.realshapes.test.ts
+- src/content/pairAxisTexts.ts
+- src/content/pairAxisTexts.test.ts
+- src/viewmodels/profileViewModel.ts
+- src/server/app.ts
+- src/server/app.test.ts
+- src/api/bazodiacClient.ts
+- src/components/Synastry.tsx
+- src/components/synastry/
+- src/components/wordingHonesty.test.ts
+- src/__tests__/synastryWording.test.ts
+- tests/e2e/mock-fufire.mjs
+- tests/e2e/synastry-completion.spec.ts
+- package.json
+- docs/
 
 ## 11. Traceability links
 All top-level REQs trace to this canvas via `canvas-link`, `canvas-problem`,
