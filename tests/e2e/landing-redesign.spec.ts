@@ -43,4 +43,12 @@ test.describe("Redesign landing — FusionHero first screen", () => {
     const txt = (await page.getByTestId("spannungs-preview").textContent()) ?? "";
     expect(txt).not.toMatch(/du bist/i);
   });
+
+  test("visible-engine bento shows six explanatory cards (no fake metric)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("engine-bento")).toBeVisible();
+    await expect(page.getByTestId("engine-card")).toHaveCount(6);
+    const bento = (await page.getByTestId("engine-bento").textContent()) ?? "";
+    expect(bento).not.toMatch(/\d+\s?%|score|du bist/i);
+  });
 });

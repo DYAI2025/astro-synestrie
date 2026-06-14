@@ -3,6 +3,9 @@ import React from "react";
 interface GlassCardProps {
   /** Soft gold glow (calc/form accent) vs. blue glow (movement/question accent). */
   accent?: "gold" | "blue" | "none";
+  // React's special `key` is not auto-injected for this repo's explicitly-typed
+  // components, so declare it here for use in lists (React still handles it specially).
+  key?: React.Key;
   className?: string;
   style?: React.CSSProperties;
   children?: React.ReactNode;
