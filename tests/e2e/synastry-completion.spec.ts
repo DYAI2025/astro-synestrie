@@ -25,7 +25,7 @@ async function computeProfile(page: Page) {
 async function runSynastry(page: Page) {
   await page.click("#nav-tab-synastry");
   await page.fill("#partner-name", "Partner Persona");
-  await page.fill("#partner-date", "1985-03-20");
+  await page.fill("#partner-date", "1988-08-08"); // → mock PARTNER_VARIANT (San-He Jahr, Chong Tag)
   await page.fill("#partner-time", "09:15");
   await page.fill("#partner-place", "Ber");
   const option = page.getByRole("button", { name: /Berlin, Deutschland/ });
