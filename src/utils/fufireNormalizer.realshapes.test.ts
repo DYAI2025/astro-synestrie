@@ -53,6 +53,26 @@ describe("normalizer vs REAL orchestrated prod raw (chart + western + fusion)", 
     expect(vm.western.ascendant).toBe("Waage");
   });
 
+  it("carries the ascendant ABSOLUTE longitude from angles.Ascendant (P7-T1)", () => {
+    const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
+    // angles.Ascendant = 190.046° (Waage 10.0°) — the real absolute ecliptic longitude.
+    expect(vm.western.ascendantLongitude).toBeCloseTo(190.046, 2);
+  });
+
+  it("returns ascendantLongitude null when no angles and no cusps (legacy, P7-T1)", () => {
+    const raw: any = { western: { sunSign: "Widder", planets: [] } };
+    const vm = normalizeFuFireProfile(raw, INPUT, "fufire-orchestrated");
+    expect(vm.western.ascendantLongitude).toBeNull();
+  });
+
+  it("returns ascendantLongitude null when ascendant is provisional/unknown-time (P7-T1)", () => {
+    const raw: any = {
+      western: { angles: { Ascendant: 190.046 }, precision: { provisional_fields: ["ascendant"] }, planets: [] },
+    };
+    const vm = normalizeFuFireProfile(raw, INPUT, "fufire-orchestrated");
+    expect(vm.western.ascendantLongitude).toBeNull();
+  });
+
   it("maps the bodies OBJECT to German planet entries with sign/degree/house", () => {
     const vm = normalizeFuFireProfile(prodOrchestratedRaw(), INPUT, "fufire-orchestrated");
     const sun = vm.western.planets.find((p) => p.name === "Sonne");

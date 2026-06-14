@@ -27,7 +27,9 @@ import {
 } from "../utils/profileService";
 import { normalizeFuFireProfile } from "../utils/fufireNormalizer";
 import { compareProfiles } from "../utils/synastry";
-import { fuseElementalWeights } from "../utils/tensionPair";
+import { fuseElementalWeights, derivePairAxes } from "../utils/tensionPair";
+import { computeInterAspects, bodyPositionsFromViewModel } from "../utils/interAspects";
+import { compareBaziPillars } from "../utils/baziCompare";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -453,17 +455,25 @@ export function createApp(): Express {
     try {
       const [a, b] = await Promise.all([resolveProfile(userV.value), resolveProfile(partnerV.value)]);
       const comparison = compareProfiles(a.viewModel, b.viewModel);
+      // P7 (additiv, LOKAL): alle Paar-Felder werden aus den zwei bereits
+      // aufgelösten ProfileViewModels abgeleitet — kein zusätzlicher FuFirE-Call.
+      // Fehlt ein Datum, bleibt das Feld ehrlich leer ([]) statt erfundener Defaults.
+      const comparisonA = a.viewModel.fusion.elementalComparison ?? [];
+      const comparisonB = b.viewModel.fusion.elementalComparison ?? [];
       res.json({
         ...comparison,
         source: "fufire-profiles-local-comparison",
         userRef: { name: a.viewModel.identity.name, sunSign: a.viewModel.western.sunSign, dayMaster: a.viewModel.bazi.dayMaster.element },
         partnerRef: { name: b.viewModel.identity.name, sunSign: b.viewModel.western.sunSign, dayMaster: b.viewModel.bazi.dayMaster.element },
-        // Additiv (Spannungsnavigator-Paar-Modus): per-Element-Verteilung beider
-        // Personen aus deren bereits aufgelösten Fusion-Daten — die Route holt
-        // ohnehin beide vollen FuFirE-Profile, kein zusätzlicher Engine-Call.
-        // Leer ([]), wenn ein Profil kein elemental_comparison liefert.
-        elementalA: fuseElementalWeights(a.viewModel.fusion.elementalComparison),
-        elementalB: fuseElementalWeights(b.viewModel.fusion.elementalComparison)
+        // Spannungsnavigator-Paar-Modus: per-Element-Verteilung beider Personen.
+        elementalA: fuseElementalWeights(comparisonA),
+        elementalB: fuseElementalWeights(comparisonB),
+        // P7 Partner-Journey-Ebenen:
+        interAspects: computeInterAspects(bodyPositionsFromViewModel(a.viewModel), bodyPositionsFromViewModel(b.viewModel)),
+        pillarComparison: compareBaziPillars(a.viewModel.bazi.pillars, b.viewModel.bazi.pillars),
+        comparisonA,
+        comparisonB,
+        pairAxes: derivePairAxes(comparisonA, comparisonB)
       });
     } catch (err) {
       sendError(res, err);
