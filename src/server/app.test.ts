@@ -87,6 +87,44 @@ afterEach(() => {
   process.env = { ...ORIGINAL_ENV };
 });
 
+describe("POST /api/timezone", () => {
+  it("returns 400 missing_coordinates when lat/lon absent", async () => {
+    const res = await request(app).post("/api/timezone").send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe("missing_coordinates");
+    expect(getTimezone).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 invalid_coordinates for non-finite / out-of-range coords (not 502)", async () => {
+    for (const body of [
+      { lat: "Infinity", lon: "-Infinity" },
+      { lat: "abc", lon: 13.4 },
+      { lat: 91, lon: 13.4 },
+      { lat: 52.5, lon: 181 },
+    ]) {
+      const res = await request(app).post("/api/timezone").send(body);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe("invalid_coordinates");
+    }
+    expect(getTimezone).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 invalid_timestamp for a non-finite timestamp", async () => {
+    const res = await request(app).post("/api/timezone").send({ lat: 52.5, lon: 13.4, timestamp: "Infinity" });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe("invalid_timestamp");
+    expect(getTimezone).not.toHaveBeenCalled();
+  });
+
+  it("forwards valid coordinates to getTimezone", async () => {
+    (getTimezone as any).mockResolvedValue({ tz: "Europe/Berlin", utcOffsetMinutes: 60 });
+    const res = await request(app).post("/api/timezone").send({ lat: 52.5, lon: 13.4 });
+    expect(res.status).toBe(200);
+    expect(res.body.tz).toBe("Europe/Berlin");
+    expect(getTimezone).toHaveBeenCalledWith(52.5, 13.4, undefined);
+  });
+});
+
 describe("POST /api/azodiac/profile", () => {
   it("returns 400 with field errors for invalid input", async () => {
     const res = await request(app).post("/api/azodiac/profile").send({ name: "", birthDate: "", birthTime: "" });

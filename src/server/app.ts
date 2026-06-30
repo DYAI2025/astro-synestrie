@@ -388,8 +388,22 @@ export function createApp(): Express {
       res.status(400).json({ error: "missing_coordinates" });
       return;
     }
+    const latN = Number(lat);
+    const lonN = Number(lon);
+    if (!Number.isFinite(latN) || !Number.isFinite(lonN) || latN < -90 || latN > 90 || lonN < -180 || lonN > 180) {
+      res.status(400).json({ error: "invalid_coordinates" });
+      return;
+    }
+    let tsN: number | undefined;
+    if (timestamp !== undefined && timestamp !== null && timestamp !== "") {
+      tsN = Number(timestamp);
+      if (!Number.isFinite(tsN)) {
+        res.status(400).json({ error: "invalid_timestamp" });
+        return;
+      }
+    }
     try {
-      res.json(await getTimezone(Number(lat), Number(lon), timestamp ? Number(timestamp) : undefined));
+      res.json(await getTimezone(latN, lonN, tsN));
     } catch (err) {
       sendError(res, err);
     }

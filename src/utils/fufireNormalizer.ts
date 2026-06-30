@@ -303,7 +303,7 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
         // Legacy/mock shape
         let degree = typeof p.degree === "number" ? p.degree : 0;
         if (typeof p.longitude === "number" && !p.degree) {
-          degree = p.longitude % 30;
+          degree = normalize360(p.longitude) % 30;
         }
         return {
           name: p.name || "Unbekannter Planet",

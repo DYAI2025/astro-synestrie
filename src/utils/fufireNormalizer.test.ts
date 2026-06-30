@@ -18,6 +18,23 @@ function provFor(vm: any, field: string) {
   return vm.provenance.find((p: any) => p.uiField.includes(field));
 }
 
+describe("normalizeFuFireProfile — legacy planet degree normalization", () => {
+  it("normalizes negative legacy longitudes into a [0,30) sign degree", () => {
+    const raw = {
+      ...FULL,
+      western: { sunSign: "Waage", moonSign: "Stier", ascendant: "Krebs", aspects: [], houses: [],
+        planets: [{ name: "Sonne", longitude: -10 }] }
+    };
+    const vm = normalizeFuFireProfile(raw, INPUT, "fallback-local");
+    const sun = vm.western.planets.find((p: any) => p.name === "Sonne");
+    expect(sun).toBeDefined();
+    // -10° longitude == 350° == 20° within its sign; must NOT be the pre-fix -10.
+    expect(sun!.degree).toBeGreaterThanOrEqual(0);
+    expect(sun!.degree).toBeLessThan(30);
+    expect(sun!.degree).toBeCloseTo(20, 6);
+  });
+});
+
 describe("normalizeFuFireProfile honesty for missing sections (real FuFirE source)", () => {
   it("marks every section available on a complete chart", () => {
     const vm = normalizeFuFireProfile(FULL, INPUT, "fufire-chart");
