@@ -84,6 +84,7 @@ export default function BaZiDetail({ viewModel }: BaZiDetailProps) {
 
   const dayMaster = viewModel.bazi.dayMaster;
   const dayun = viewModel.bazi.dayun;
+  const baziProvenance = viewModel.provenance.find((p) => p.uiField.includes("BaZi"));
 
   if (!viewModel.bazi.available) {
     return (
@@ -142,7 +143,7 @@ export default function BaZiDetail({ viewModel }: BaZiDetailProps) {
                 </div>
                 <div className="text-right shrink-0">
                   <span className="font-mono text-[10px] uppercase font-bold text-gold-muted bg-gold-muted/5 border border-gold-muted/15 px-3 py-1 rounded inline-block">
-                    Einflussstärke: 1.5x Wichtung
+                    Quelle: {baziProvenance?.source ?? viewModel.source}
                   </span>
                 </div>
               </div>

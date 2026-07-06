@@ -1,8 +1,8 @@
 import type { TensionState } from "../tensionNavigator";
 
-// FusionHero preview state (RD-2). Pure: maps a real TensionState (or its absence) to the
-// minimal shape the hero renders. The landing has no profile yet → demo/missing modes carry
-// NO fabricated personalized values; `demo` is visibly labelled at the call site.
+// FusionHero preview state (RD-2). Pure: maps a real TensionState (or its absence)
+// to the minimal shape the hero renders. The landing has no profile yet, so it
+// must render missing until real FuFirE-backed data exists.
 
 export type TensionAxisId =
   | "structure_flow"
@@ -14,12 +14,12 @@ export type TensionAxisId =
 export type PreviewSignal = "leise" | "spuerbar" | "dominant";
 
 export interface TensionPreviewState {
-  mode: "demo" | "computed" | "missing";
+  mode: "computed" | "missing";
   activeAxis: TensionAxisId | null;
   signalLevel: PreviewSignal | null;
   secondaryAxes: TensionAxisId[];
   question: string | null;
-  source: "static-demo" | "fufire-viewmodel" | "missing";
+  source: "fufire-viewmodel" | "missing";
 }
 
 /** One curated reflection question per axis — a question, never an identity claim. */
@@ -30,18 +30,6 @@ export const AXIS_QUESTION: Record<TensionAxisId, string> = {
   action_being: "Wo drängt es dich zu handeln — und wo dürfte mehr Sein sein?",
   tradition_innovation: "Was hältst du aus Tradition — und wo lockt das Neue?",
 };
-
-/** Static, deterministic demo field for the pre-input hero. Clearly labelled `Demo` in UI. */
-export function demoPreview(): TensionPreviewState {
-  return {
-    mode: "demo",
-    activeAxis: "structure_flow",
-    signalLevel: "spuerbar",
-    secondaryAxes: ["tradition_innovation", "action_being"],
-    question: AXIS_QUESTION.structure_flow,
-    source: "static-demo",
-  };
-}
 
 /** Neutral missing state — no axis, no signal, no question, no fabricated value. */
 export function missingPreview(): TensionPreviewState {

@@ -19,9 +19,9 @@ export default function LandingPage({ onStart }: { onStart?: () => void }) {
       </SectionShell>
 
       <SectionShell
-        eyebrow="Probelauf"
-        heading="Teste eine Spannung in 90 Sekunden"
-        intro="Kein Konto nötig. Ein Demo-Durchlauf zeigt die Bewegung: aktive Spannung, eine Frage, deine Reaktion."
+        eyebrow="Live-Einstieg"
+        heading="Berechne dein erstes Spannungsfeld"
+        intro="Kein Konto nötig. Ohne Geburtsdaten gibt es keine Beispielwerte; die nächste Anzeige kommt aus FuFirE oder aus einer echten Fehlermeldung."
       >
         <SpannungsPreview onStart={onStart} />
       </SectionShell>

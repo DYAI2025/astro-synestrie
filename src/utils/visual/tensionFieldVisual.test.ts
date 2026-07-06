@@ -1,21 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { demoPreview, missingPreview, previewFromTension, AXIS_QUESTION } from "./tensionFieldVisual";
+import { missingPreview, previewFromTension, AXIS_QUESTION } from "./tensionFieldVisual";
 import type { TensionState } from "../tensionNavigator";
 
 describe("tensionFieldVisual — FusionHero preview state (RD-2)", () => {
-  it("demoPreview is deterministic, labelled static-demo, one active axis + question", () => {
-    const a = demoPreview();
-    const b = demoPreview();
-    expect(a).toEqual(b); // deterministic, no Date/random
-    expect(a.mode).toBe("demo");
-    expect(a.source).toBe("static-demo");
-    expect(a.activeAxis).toBe("structure_flow");
-    expect(a.signalLevel).toBe("spuerbar");
-    expect(a.question && a.question.length).toBeGreaterThan(10);
-    expect(a.question).toContain("?");
-    expect(a.secondaryAxes.length).toBeLessThanOrEqual(2);
-  });
-
   it("missingPreview is a neutral state — no axis, no fabricated value", () => {
     const m = missingPreview();
     expect(m.mode).toBe("missing");

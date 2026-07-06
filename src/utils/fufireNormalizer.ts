@@ -532,8 +532,9 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
   };
 
   // D. WU XING DISTRIBUTION
-  // Never fabricate a distribution for a real FuFirE source that did not provide one.
-  const wuxingAvail = isFallback || Boolean(raw.wuxing);
+  // Never fabricate a distribution for a real FuFirE source that did not provide
+  // a usable positive vector. A present-but-empty `{}` is an error/missing state,
+  // not five real 0% "Defizit" bars.
   const rawWuxing = raw.wuxing && typeof raw.wuxing === "object" ? raw.wuxing : {};
   // REAL shapes: WxResponse.wu_xing_vector (German keys, 0..1 weights) or the
   // chart's WuXingSection.from_planets (raw weights). Legacy: distribution
@@ -555,6 +556,10 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
   };
   const weightTotal = Object.values(rawWeights).reduce(
     (acc, v) => acc + (typeof v === "number" && Number.isFinite(v) && v > 0 ? v : 0), 0);
+  const wuxingAvail = Boolean(raw.wuxing) && weightTotal > 0;
+  if (raw.wuxing && weightTotal === 0) {
+    warnings.push("Wu-Xing-Daten wurden ohne nutzbaren Elementvektor geliefert.");
+  }
 
   // Percentage shares; absent section stays at zero (rendered as missing-state).
   const distribution: Record<ElementType, number> = Object.fromEntries(
@@ -591,7 +596,9 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
 
   const vectorExplanation = wuxingAvail
     ? (rawWuxing.vectorExplanation || `Ihre Elementenverteilung verweist auf dominante ${maxElement}-Frequenzen (${distribution[maxElement]}%), während ${minElement} (${distribution[minElement]}%) Ergänzungsimpulse verträgt.`)
-    : "Wu-Xing-Wandlungsphasen wurden von FuFirE nicht geliefert (missing).";
+    : raw.wuxing
+      ? "Wu-Xing-Wandlungsphasen wurden ohne nutzbaren Elementvektor geliefert (error)."
+      : "Wu-Xing-Wandlungsphasen wurden von FuFirE nicht geliefert (missing).";
 
   // E. FUSION MATRIX — never fabricate a coherence index for a missing section.
   const rawFusion = raw.fusion && typeof raw.fusion === "object" ? raw.fusion : {};
@@ -641,6 +648,9 @@ export function normalizeFuFireProfile(raw: any, input: any, source: ProfileSour
     // level from h_calibrated thirds instead (<0.33 leise, <0.66 spuerbar,
     // else dominant) — a coarse bucketing, not a statistical statement.
     signalLevel = hCalibrated < 0.33 ? "leise" : hCalibrated < 0.66 ? "spuerbar" : "dominant";
+  }
+  if (coherenceIndex === null) {
+    signalLevel = null;
   }
 
   // Custom label rating — NIE aus einem fehlenden Wert ableiten (null < 60 wäre sonst true).
@@ -845,4 +855,3 @@ export function getRawSimulatedProfileFromLocal(birthData: any) {
     fusion: {}
   };
 }
-

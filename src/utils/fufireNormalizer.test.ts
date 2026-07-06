@@ -56,6 +56,15 @@ describe("normalizeFuFireProfile honesty for missing sections (real FuFirE sourc
     expect(provFor(vm, "Wu Xing").status).toBe("missing");
   });
 
+  it("treats present-but-empty Wu-Xing payload as unavailable instead of five fake 0% bars", () => {
+    const vm = normalizeFuFireProfile({ ...FULL, wuxing: {} }, INPUT, "fufire-chart");
+    expect(vm.wuxing.available).toBe(false);
+    expect(Object.values(vm.wuxing.distribution).every((v) => v === 0)).toBe(true);
+    expect(vm.wuxing.elementCards).toHaveLength(0);
+    expect(vm.wuxing.vectorExplanation).toContain("ohne nutzbaren Elementvektor");
+    expect(vm.warnings).toContain("Wu-Xing-Daten wurden ohne nutzbaren Elementvektor geliefert.");
+  });
+
   it("does NOT fabricate a coherence index when fusion is missing", () => {
     const { fusion, ...rest } = FULL;
     const vm = normalizeFuFireProfile(rest, INPUT, "fufire-chart");

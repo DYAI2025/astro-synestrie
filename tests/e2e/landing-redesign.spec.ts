@@ -6,14 +6,15 @@ import { test, expect } from "@playwright/test";
 // which now traverse this landing via dismissLanding).
 
 test.describe("Redesign landing — FusionHero first screen", () => {
-  test("cold start shows the FusionHero: one tension question, demo-labelled, NO score", async ({ page }) => {
+  test("cold start shows the FusionHero missing-state, NO demo score", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("fusion-hero")).toBeVisible();
-    await expect(page.getByTestId("fusion-hero-question")).toContainText("?");
-    await expect(page.getByTestId("fusion-hero-demo")).toBeVisible();
+    await expect(page.getByTestId("fusion-hero-question")).toContainText("Noch keine Engine-Daten");
+    await expect(page.getByTestId("fusion-hero-demo")).toHaveCount(0);
     // Brief: kein Score/% im Hero.
     const hero = (await page.getByTestId("fusion-hero").textContent()) ?? "";
     expect(hero).not.toMatch(/%/);
+    expect(hero).not.toMatch(/demo/i);
     // Anti-reification headline present.
     await expect(page.getByTestId("fusion-hero")).toContainText("kein Urteil");
   });
@@ -29,19 +30,17 @@ test.describe("Redesign landing — FusionHero first screen", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.getByTestId("fusion-hero")).toBeVisible();
-    await expect(page.getByTestId("fusion-hero-question")).toContainText("?");
+    await expect(page.getByTestId("fusion-hero-question")).toContainText("Noch keine Engine-Daten");
   });
 
-  test("micro-experience demo: start → question → react → note + CTA (no identity claim)", async ({ page }) => {
+  test("pre-input tension preview shows no static example and links to live input", async ({ page }) => {
     await page.goto("/");
-    await page.getByTestId("spannungs-start").click();
-    await expect(page.getByTestId("spannungs-question")).toBeVisible({ timeout: 5000 });
-    await expect(page.getByTestId("spannungs-result")).toContainText("Spannung");
-    await page.getByTestId("spannungs-reaction-trifft").click();
-    await expect(page.getByTestId("spannungs-note")).toBeVisible();
-    await expect(page.getByTestId("spannungs-cta")).toBeVisible();
+    await expect(page.getByTestId("spannungs-missing")).toContainText("kein berechnetes Spannungsfeld");
+    await expect(page.getByTestId("spannungs-question")).toHaveCount(0);
     const txt = (await page.getByTestId("spannungs-preview").textContent()) ?? "";
-    expect(txt).not.toMatch(/du bist/i);
+    expect(txt).not.toMatch(/demo|du bist|\d+\s?%/i);
+    await page.getByTestId("spannungs-live-cta").click();
+    await expect(page.locator("#input-name")).toBeVisible();
   });
 
   test("visible-engine bento shows six explanatory cards (no fake metric)", async ({ page }) => {
