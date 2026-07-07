@@ -43,16 +43,3 @@ export function missingPreview(): TensionPreviewState {
   };
 }
 
-/** Map a real computed TensionState → preview. Null (no usable tension) → missing. */
-export function previewFromTension(state: TensionState | null): TensionPreviewState {
-  if (!state || !state.activeAxis) return missingPreview();
-  const activeAxis = state.activeAxis.id as TensionAxisId;
-  return {
-    mode: "computed",
-    activeAxis,
-    signalLevel: state.signalLevel as PreviewSignal,
-    secondaryAxes: state.secondaries.map((s) => s.id as TensionAxisId),
-    question: AXIS_QUESTION[activeAxis] ?? null,
-    source: "fufire-viewmodel",
-  };
-}

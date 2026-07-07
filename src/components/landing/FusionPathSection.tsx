@@ -27,7 +27,7 @@ export default function FusionPathSection({ onStart }: { onStart?: () => void })
             <li key={p} className="text-[13px] leading-relaxed text-stone-300">· {p}</li>
           ))}
         </ul>
-        <p className="font-mono text-[10px] text-stone-500">{PREMIUM_NOTE}</p>
+        <p className="font-mono text-[10px] text-stone-400">{PREMIUM_NOTE}</p>
         <button
           type="button"
           data-testid="fusion-path-cta"
