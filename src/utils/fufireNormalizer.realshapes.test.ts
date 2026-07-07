@@ -165,7 +165,7 @@ describe("normalizer vs REAL orchestrated prod raw (chart + western + fusion)", 
     // baseline 0.25, sigma 0.25 -> z = (h_raw - 0.25) / 0.25.
     const vmFor = (hRaw: number) =>
       normalizeFuFireProfile(
-        { fusion: { calibration: { h_raw: hRaw, h_baseline: 0.25, h_sigma: 0.25 } } },
+        { fusion: { calibration: { h_raw: hRaw, h_baseline: 0.25, h_sigma: 0.25, h_calibrated: 0.5 } } },
         INPUT,
         "fufire-orchestrated"
       );
@@ -311,7 +311,7 @@ describe("normalizer degrades per-section instead of throwing", () => {
     );
     expect(vm.fusion.coherenceIndex).toBeNull();
     expect(vm.fusion.coherenceCalibrated).toBe(false);
-    expect(vm.fusion.signalLevel).toBe("spuerbar");
+    expect(vm.fusion.signalLevel).toBeNull();
     expect(vm.fusion.coherenceRating).toBe("Keine Kohärenz-Daten verfügbar");
   });
 

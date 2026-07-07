@@ -49,7 +49,7 @@ export function derivePairTension(
   if (!elementalA?.length || !elementalB?.length) return null;
   const byElementB = new Map(elementalB.map((w) => [w.element, w.weight]));
   const comparison = elementalA
-    .filter((a) => byElementB.has(a.element) && Number.isFinite(a.weight))
+    .filter((a) => byElementB.has(a.element) && Number.isFinite(a.weight) && Number.isFinite(byElementB.get(a.element)!))
     .map((a) => {
       const wB = byElementB.get(a.element)!;
       return { element: a.element, western: a.weight, bazi: wB, difference: a.weight - wB };

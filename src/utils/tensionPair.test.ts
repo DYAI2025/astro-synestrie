@@ -81,6 +81,22 @@ describe("derivePairTension", () => {
   it("degeneriert ehrlich: identische Verteilungen (keine Differenz) → null", () => {
     expect(derivePairTension(A, A)).toBeNull();
   });
+
+  it("ignoriert nicht-finite B-Gewichte statt NaN-Differenzen zu erzeugen", () => {
+    const badB: ElementalWeight[] = [
+      { element: "Holz", weight: 0.1 },
+      { element: "Feuer", weight: 0.2 },
+      { element: "Erde", weight: 0.1 },
+      { element: "Metall", weight: NaN },
+      { element: "Wasser", weight: Infinity },
+    ];
+    const t = derivePairTension(A, badB);
+    if (t) {
+      for (const ax of t.axes) {
+        expect(Number.isFinite(ax.difference)).toBe(true);
+      }
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------

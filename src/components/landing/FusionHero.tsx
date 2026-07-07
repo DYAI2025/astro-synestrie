@@ -1,7 +1,7 @@
 import React from "react";
 import { polar, curvePath } from "../../utils/visual/polar";
 import { ELEMENT_AXIS_MAP } from "../../utils/tensionNavigator";
-import { demoPreview, type TensionPreviewState } from "../../utils/visual/tensionFieldVisual";
+import { missingPreview, type TensionPreviewState } from "../../utils/visual/tensionFieldVisual";
 import GlassCard from "../design/GlassCard";
 import GoldLeafText from "../design/GoldLeafText";
 
@@ -19,7 +19,7 @@ const NODE_R = 16;
 const AXES = Object.values(ELEMENT_AXIS_MAP);
 
 export default function FusionHero({
-  preview = demoPreview(),
+  preview = missingPreview(),
   onStart,
 }: {
   preview?: TensionPreviewState;
@@ -86,18 +86,13 @@ export default function FusionHero({
         {/* central question card overlay */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
           <GlassCard accent="gold" className="pointer-events-auto max-w-[300px] p-5 text-center space-y-3">
-            {preview.mode === "demo" && (
-              <span data-testid="fusion-hero-demo" className="inline-block font-mono text-[8px] uppercase tracking-[0.2em] text-fusion-blue/80 border border-fusion-blue/30 rounded-full px-2 py-0.5">
-                Demo
-              </span>
-            )}
             {preview.question ? (
               <p data-testid="fusion-hero-question" className="font-serif text-base leading-relaxed text-slate-100">
                 {preview.question}
               </p>
             ) : (
               <p data-testid="fusion-hero-question" className="text-xs text-stone-400 leading-relaxed">
-                Noch keine Daten — gib deine Geburtsdaten ein, dann zeigt das Modell deine erste Spannung.
+                Noch keine Engine-Daten. Gib deine Geburtsdaten ein, dann zeigt FuFirE dein erstes berechnetes Spannungsfeld.
               </p>
             )}
             <p className="font-mono text-[9px] text-stone-400">Modellergebnis, keine Eigenschaft.</p>

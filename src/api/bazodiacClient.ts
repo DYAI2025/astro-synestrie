@@ -231,7 +231,15 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
     const message = err.message || code || `HTTP error ${res.status}`;
     throw new BazodiacRequestError(message, { code, status: res.status, fields: err.fields });
   }
-  return res.json();
+  try {
+    return await res.json();
+  } catch {
+    throw new BazodiacRequestError("Antwort konnte nicht gelesen werden.", {
+      code: "response_parse_error",
+      status: res.status,
+      isNetworkError: false
+    });
+  }
 }
 
 export class BazodiacClient {
