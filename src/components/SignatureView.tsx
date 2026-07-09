@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Activity, Radio, ChevronDown, ChevronUp } from "lucide-react";
 import { ProfileViewModel, SignalLevel } from "../viewmodels/profileViewModel";
 import { deriveTension } from "../utils/tensionNavigator";
@@ -47,7 +47,11 @@ export const SignatureView: React.FC<SignatureViewProps> = ({ viewModel }) => {
   const [status, setStatus] = useState<SignatureStatus | null>(null);
 
   const fusion = viewModel.fusion;
-  const input = toSignatureInput(viewModel);
+  // Stabile Identität ist Pflicht: SignatureCanvas memoisiert auf `input` und
+  // meldet Status via setState nach oben. Ein pro Render neu gebautes Objekt
+  // erzeugte hier eine Endlosschleife (input → signature → onStatus → setStatus
+  // → Re-Render → neues input …) — Regressionstest: SignatureView.renderloop.test.tsx.
+  const input = useMemo(() => toSignatureInput(viewModel), [viewModel]);
   const tension = deriveTension(fusion.elementalComparison, fusion.signalLevel);
 
   if (!input) {
