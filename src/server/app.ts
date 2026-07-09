@@ -31,7 +31,6 @@ import { compareProfiles } from "../utils/synastry";
 import { fuseElementalWeights, derivePairAxes } from "../utils/tensionPair";
 import { computeInterAspects, bodyPositionsFromViewModel } from "../utils/interAspects";
 import { compareBaziPillars } from "../utils/baziCompare";
-import { createRealtimeSession } from "./realtime";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -576,21 +575,6 @@ export function createApp(): Express {
       // Never forward the raw SDK error text to the browser.
       console.error("Gemini provider error (server-side only):", error?.message);
       sendError(res, { code: "gemini_error", httpStatus: 502, message: "Gemini-Deutung ist derzeit nicht verfügbar." });
-    }
-  });
-
-  // --- Bazodiac-Agents Realtime audio session (server-side OpenAI key only) ---
-
-  app.post("/api/realtime/session", async (req, res) => {
-    try {
-      await createRealtimeSession(req, res);
-    } catch (error: any) {
-      console.error("Realtime session handler failed:", error?.message);
-      sendError(res, {
-        code: "openai_realtime_session_failed",
-        httpStatus: 502,
-        message: "OpenAI Realtime-Session konnte nicht gestartet werden."
-      });
     }
   });
 
