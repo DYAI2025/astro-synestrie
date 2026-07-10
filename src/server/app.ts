@@ -137,6 +137,23 @@ interface DailyEasternVM extends DailySectionVM {
   jieqi: string | null;
 }
 
+/** Westliche Evidenz — Tagespuls 2.0 braucht die Rohanker, nicht nur Prosa. */
+interface DailyWestEvidenceVM {
+  transitSectors: number[];
+  natalFocus: string[];
+}
+
+/** Natal-Profil + 5D-Signatur aus dem Bootstrap — bisher nach extractSoulprintSectors verworfen. */
+interface DailyNatalVM {
+  sunSign: string | null;
+  moonSign: string | null;
+  ascendantSign: string | null;
+  dayMaster: string | null;
+  harmonyIndex: number | null;
+  /** 5 WuXing-Gewichte der stabilen Signatur (signature_blueprint.elements). */
+  elements: Record<string, number> | null;
+}
+
 interface DailyPulseVM {
   date: string;
   western: DailySectionVM | null;
@@ -150,6 +167,10 @@ interface DailyPulseVM {
   description: string | null;
   source: "fufire" | "missing";
   available: boolean;
+  /** Tagespuls 2.0 — Rohanker statt Wegwerfen (null = Engine liefert sie nicht). */
+  westEvidence: DailyWestEvidenceVM | null;
+  natal: DailyNatalVM | null;
+  qualityFlags: Record<string, unknown> | null;
 }
 
 function dailyText(v: unknown): string | null {
@@ -175,7 +196,46 @@ function dailySection(raw: any): DailySectionVM | null {
  * push_text/pushworthy and jieqi/weekday context notes — all of it is surfaced.
  * No metrics are invented: fields the engine does not send do not exist here.
  */
-function normalizeDaily(daily: any): DailyPulseVM {
+/** Zahlenliste defensiv extrahieren (Sektoren-Indizes bleiben roh — Labeling ist Etappe 2). */
+function numberList(v: unknown): number[] {
+  return Array.isArray(v) ? v.filter((n): n is number => typeof n === "number" && Number.isFinite(n)) : [];
+}
+
+function stringList(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((s): s is string => typeof s === "string" && s.trim() !== "") : [];
+}
+
+/** 5D-Elementgewichte defensiv extrahieren; < 2 valide Einträge → null (nichts erfinden). */
+function elementWeights(v: unknown): Record<string, number> | null {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const out: Record<string, number> = {};
+  for (const [k, raw] of Object.entries(v as Record<string, unknown>)) {
+    if (typeof raw === "number" && Number.isFinite(raw)) out[k] = raw;
+  }
+  return Object.keys(out).length >= 2 ? out : null;
+}
+
+/** Natal-Profil + Signatur aus der Bootstrap-Antwort — die Felder, die bisher verworfen wurden. */
+function extractNatal(bootstrap: unknown): DailyNatalVM | null {
+  if (!bootstrap || typeof bootstrap !== "object") return null;
+  const b = bootstrap as any;
+  const profile = b.profile && typeof b.profile === "object" ? b.profile : {};
+  const blueprint = b.signature_blueprint && typeof b.signature_blueprint === "object" ? b.signature_blueprint : {};
+  const natal: DailyNatalVM = {
+    sunSign: dailyText(profile.sun_sign),
+    moonSign: dailyText(profile.moon_sign),
+    ascendantSign: dailyText(profile.ascendant_sign),
+    dayMaster: dailyText(profile.day_master),
+    harmonyIndex: typeof profile.harmony_index === "number" && Number.isFinite(profile.harmony_index)
+      ? profile.harmony_index
+      : null,
+    elements: elementWeights(blueprint.elements)
+  };
+  const hasContent = natal.sunSign || natal.dayMaster || natal.elements;
+  return hasContent ? natal : null;
+}
+
+function normalizeDaily(daily: any, bootstrap?: unknown): DailyPulseVM {
   const d = daily || {};
   const western = dailySection(d.western);
 
@@ -206,6 +266,18 @@ function normalizeDaily(daily: any): DailyPulseVM {
   const jieqiNote = dailyText(f?.jieqi_note) || dailyText(d.eastern?.jieqi_note) || dailyText(d.western?.jieqi_note);
   const weekdayNote = dailyText(f?.weekday_note) || dailyText(d.western?.weekday_note) || dailyText(d.eastern?.weekday_note);
 
+  // Tagespuls 2.0: westliche Rohanker durchreichen statt verwerfen.
+  const westEv = d.western && typeof d.western === "object" && d.western.evidence && typeof d.western.evidence === "object"
+    ? d.western.evidence
+    : null;
+  const westEvidence: DailyWestEvidenceVM | null = westEv
+    ? { transitSectors: numberList(westEv.transit_sectors), natalFocus: stringList(westEv.natal_focus) }
+    : null;
+
+  const qualityFlags = d.quality_flags && typeof d.quality_flags === "object" && !Array.isArray(d.quality_flags)
+    ? (d.quality_flags as Record<string, unknown>)
+    : null;
+
   // Available = the engine delivered real user-facing content for the day.
   const available = Boolean(description || western || eastern);
   return {
@@ -220,8 +292,45 @@ function normalizeDaily(daily: any): DailyPulseVM {
     weekdayNote,
     description,
     source: available ? "fufire" : "missing",
-    available
+    available,
+    westEvidence: westEvidence && (westEvidence.transitSectors.length || westEvidence.natalFocus.length) ? westEvidence : null,
+    natal: extractNatal(bootstrap),
+    qualityFlags
   };
+}
+
+/**
+ * Bootstrap-Cache: die Bootstrap-Antwort hängt nur von den Geburtsdaten ab,
+ * nicht vom Zieldatum — bisher wurden pro Tagesklick ZWEI Upstream-Calls
+ * ausgelöst und die Bootstrap-Antwort bis auf soulprint_sectors verworfen.
+ * Der Cache ist bewusst klein und kurzlebig (kein persistenter User-Store).
+ */
+const BOOTSTRAP_TTL_MS = 60 * 60 * 1000;
+const BOOTSTRAP_CACHE_MAX = 200;
+const bootstrapCache = new Map<string, { at: number; data: unknown }>();
+
+function bootstrapCacheKey(value: ValidatedBirthInput): string {
+  // Nur chart-relevante Felder — der Name ändert die Berechnung nicht.
+  return JSON.stringify([value.birthDate, value.birthTime, value.lat, value.lon, value.tz, value.gender, value.timeKnown]);
+}
+
+async function getBootstrapCached(value: ValidatedBirthInput): Promise<unknown> {
+  const key = bootstrapCacheKey(value);
+  const hit = bootstrapCache.get(key);
+  if (hit && Date.now() - hit.at < BOOTSTRAP_TTL_MS) return hit.data;
+  const data = await FuFirEClient.postExperienceBootstrap(buildBootstrapPayload(value));
+  bootstrapCache.delete(key);
+  bootstrapCache.set(key, { at: Date.now(), data });
+  if (bootstrapCache.size > BOOTSTRAP_CACHE_MAX) {
+    const oldest = bootstrapCache.keys().next().value;
+    if (oldest !== undefined) bootstrapCache.delete(oldest);
+  }
+  return data;
+}
+
+/** Für Tests: deterministischer Zustand ohne Prozess-Neustart. */
+export function clearBootstrapCache(): void {
+  bootstrapCache.clear();
 }
 
 /**
@@ -475,7 +584,9 @@ export function createApp(): Express {
     }
     try {
       // BootstrapRequest/DailyRequest wrap a BirthInput — NOT the /chart shape.
-      const bootstrap = await FuFirEClient.postExperienceBootstrap(buildBootstrapPayload(value));
+      // Gecacht pro Geburtsdaten: die Tagesnavigation (±7 Tage) löst sonst
+      // zwei Upstream-Calls pro Klick aus.
+      const bootstrap = await getBootstrapCached(value);
       // DailyRequest requires the 12-sector soulprint from the bootstrap
       // response. Never fabricate sectors — missing ring = upstream failure.
       const sectors = extractSoulprintSectors(bootstrap);
@@ -488,7 +599,9 @@ export function createApp(): Express {
         return;
       }
       const daily = await FuFirEClient.postExperienceDaily(buildDailyPayload(value, sectors, targetDate.value));
-      res.json(normalizeDaily(daily));
+      // Tagespuls 2.0: Bootstrap-Profil + 5D-Signatur wandern mit ins VM,
+      // statt nach extractSoulprintSectors verworfen zu werden.
+      res.json(normalizeDaily(daily, bootstrap));
     } catch (err) {
       sendError(res, err);
     }
