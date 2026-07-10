@@ -511,12 +511,42 @@ describe("POST /api/azodiac/bazi/dayun", () => {
     expect(FuFirEClient.postBaziDayun).not.toHaveBeenCalled();
   });
 
+  it("liefert ehrlichen Missing-State bei unbekannter Geburtszeit (keine 12:00-Fabrikation)", async () => {
+    const res = await request(app).post("/api/azodiac/bazi/dayun").send({ ...VALID_BODY, timeKnown: false });
+    expect(res.status).toBe(200);
+    expect(res.body.available).toBe(false);
+    expect(res.body.status).toBe("missing-birth-time");
+    expect(FuFirEClient.postBaziDayun).not.toHaveBeenCalled();
+  });
+
   it("liefert Missing-State wenn FuFirE keine auswertbaren Zyklen sendet", async () => {
     (FuFirEClient.postBaziDayun as any).mockResolvedValue({ dayun: { cycles: [] } });
     const res = await request(app).post("/api/azodiac/bazi/dayun").send(VALID_BODY);
     expect(res.status).toBe(200);
     expect(res.body.available).toBe(false);
     expect(res.body.status).toBe("missing");
+  });
+
+  it("mappt Upstream-Fehler auf den Standard-Fehlerpfad", async () => {
+    (FuFirEClient.postBaziDayun as any).mockRejectedValue({ httpStatus: 502, code: "fufire_unavailable", message: "x" });
+    const res = await request(app).post("/api/azodiac/bazi/dayun").send(VALID_BODY);
+    expect(res.status).toBe(502);
+    expect(res.body.error).toBe("fufire_unavailable");
+  });
+
+  it("droppt Zyklen ohne pillar-Objekt statt zu crashen", async () => {
+    (FuFirEClient.postBaziDayun as any).mockResolvedValue({
+      dayun: { cycles: [
+        null,
+        { sequence: 1, pillar: null },
+        { sequence: 2, age_start: 3, age_end: 13, pillar: { stem: "Xin", branch: "Si" }, is_current: true }
+      ] }
+    });
+    const res = await request(app).post("/api/azodiac/bazi/dayun").send(VALID_BODY);
+    expect(res.status).toBe(200);
+    expect(res.body.available).toBe(true);
+    expect(res.body.cycles).toHaveLength(1);
+    expect(res.body.cycles[0].isCurrent).toBe(true);
   });
 
   it("validiert die Geburtsdaten wie alle anderen Routen", async () => {

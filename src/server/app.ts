@@ -659,6 +659,19 @@ export function createApp(): Express {
       res.status(400).json({ error: "invalid_birth_input", fields: errors });
       return;
     }
+    if (value.timeKnown === false) {
+      // Ehrlich: Dayun-Start hängt an der exakten Geburtszeit (Distanz zum Jieqi);
+      // mit der 12:00-Platzhalterzeit würde ein potenziell falscher Zyklus als echt
+      // ausgeliefert (BIRTH-TIME-01-Klasse). Lieber sichtbar leer als still falsch.
+      res.json({
+        available: false,
+        status: "missing-birth-time",
+        source: "missing",
+        message: "Die Dekaden-Säulen sind ohne belastbare Geburtszeit nicht seriös bestimmbar — der Startpunkt hängt an der exakten Zeit. Es wird bewusst nichts erfunden.",
+        cycles: []
+      });
+      return;
+    }
     const payload = buildDayunPayload(value);
     if (!payload) {
       // Ehrlich: ohne sex_at_birth keine Laufrichtung (Engine: 422 direction_basis_missing).
