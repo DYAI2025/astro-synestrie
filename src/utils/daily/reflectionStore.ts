@@ -110,6 +110,21 @@ export function aggregateByType(dayType: DayTypeId): DayTypeAggregate {
   return agg;
 }
 
+/** Merge externer Einträge (Sync): gewinnt nur mit neuerem updatedAt oder wenn lokal fehlend. */
+export function importReflections(items: DailyReflection[]): number {
+  const all = readAll();
+  let imported = 0;
+  for (const item of items) {
+    const local = all[item.date];
+    if (!local || item.updatedAt > local.updatedAt) {
+      all[item.date] = item;
+      imported++;
+    }
+  }
+  if (imported > 0) writeAll(all);
+  return imported;
+}
+
 /** Reflexionen ab einem ISO-Datum (inkl.), chronologisch — für den Wochenbogen. */
 export function listReflectionsSince(sinceDate: string): DailyReflection[] {
   return Object.values(readAll())
