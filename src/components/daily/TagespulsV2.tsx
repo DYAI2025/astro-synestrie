@@ -13,6 +13,8 @@ import {
   Sparkles,
   Check,
   PenLine,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { motion } from "motion/react";
 import {
@@ -31,6 +33,7 @@ import {
   saveReflection,
 } from "../../utils/daily/reflectionStore";
 import { sectorLabel } from "../../utils/daily/sectorLabels";
+import Wochenbogen from "./Wochenbogen";
 
 /**
  * TagespulsV2 — "Muster-Spiegel an der Signatur" (Etappe 1).
@@ -217,6 +220,7 @@ export default function TagespulsV2({ birthData }: TagespulsV2Props) {
   const [reflection, setReflection] = React.useState<DailyReflection | null>(null);
   const [freitext, setFreitext] = React.useState("");
   const [freitextOpen, setFreitextOpen] = React.useState(false);
+  const [wochenbogenOpen, setWochenbogenOpen] = React.useState(false);
 
   const targetDate = localDateString(dayOffset);
   const birthKey = React.useMemo(() => JSON.stringify(toBirthInputPayload(birthData)), [birthData]);
@@ -634,6 +638,19 @@ export default function TagespulsV2({ birthData }: TagespulsV2Props) {
               </>
             )}
           </div>
+
+          {/* 7. Wochenbogen — ruhiger Rückblick, aufklappbar (kein Pflichtteil des Rituals) */}
+          <div className="text-center">
+            <button
+              onClick={() => setWochenbogenOpen((o) => !o)}
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-stone-400 hover:text-gold-light transition-colors cursor-pointer"
+              data-testid="wochenbogen-toggle"
+            >
+              Dein Wochenbogen
+              {wochenbogenOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+          {wochenbogenOpen && <Wochenbogen />}
 
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-xs text-stone-500" data-testid="daily-footer">

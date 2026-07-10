@@ -154,6 +154,15 @@ describe("TagespulsV2 — Kernritual", () => {
     await render(vmFixture({ westEvidence: { transitSectors: [99], natalFocus: ["sun"] } }));
     expect(q('[data-testid="daily-west-sectors"]')).toBeNull();
   });
+
+  it("Wochenbogen ist aufklappbar (ruhiger Rückblick, kein Pflichtteil)", async () => {
+    await render(vmFixture());
+    expect(q('[data-testid="wochenbogen"]')).toBeNull();
+    await act(async () => {
+      (q('[data-testid="wochenbogen-toggle"]') as HTMLElement).click();
+    });
+    expect(q('[data-testid="wochenbogen"]')).not.toBeNull();
+  });
 });
 
 describe("Wording-Gate für daily/ (Top-Level-Scanner erfasst Unterverzeichnisse nicht)", () => {
@@ -169,6 +178,7 @@ describe("Wording-Gate für daily/ (Top-Level-Scanner erfasst Unterverzeichnisse
     join(__dirname, "..", "..", "utils", "daily", "reflectionStore.ts"),
     join(__dirname, "..", "..", "utils", "daily", "sectorLabels.ts"),
     join(__dirname, "..", "..", "utils", "daily", "weeklyObservations.ts"),
+    join(__dirname, "Wochenbogen.tsx"),
   ];
 
   for (const file of FILES) {
