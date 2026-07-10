@@ -334,6 +334,15 @@ export function clearBootstrapCache(): void {
   bootstrapCache.clear();
 }
 
+// --- Transit-Now: globaler Himmel (nicht profilspezifisch) — 10-min-Cache ---
+const TRANSIT_TTL_MS = 10 * 60 * 1000;
+let transitCache: { at: number; data: unknown } | null = null;
+
+/** Für Tests: deterministischer Zustand ohne Prozess-Neustart. */
+export function clearTransitCache(): void {
+  transitCache = null;
+}
+
 /**
  * Tagesnavigation: the UI may request a specific target_date (±7 days around
  * today). One extra day of tolerance absorbs the timezone skew between the
@@ -603,6 +612,26 @@ export function createApp(): Express {
       // Tagespuls 2.0: Bootstrap-Profil + 5D-Signatur wandern mit ins VM,
       // statt nach extractSoulprintSectors verworfen zu werden.
       res.json(normalizeDaily(daily, bootstrap));
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  // --- Transit-Now: aktueller Himmel für alle Nutzer gleich ---
+
+  app.get("/api/azodiac/transit/now", async (_req, res) => {
+    if (transitCache && Date.now() - transitCache.at < TRANSIT_TTL_MS) {
+      res.json(transitCache.data);
+      return;
+    }
+    try {
+      const raw: any = await FuFirEClient.getTransitNow();
+      // Ehrliche Durchreichung: Planet-Shapes (0-Index-Sektoren) bleiben roh,
+      // das Labeling ist Client-Sache. Fehler werden bewusst NICHT gecacht.
+      const planets = raw?.planets && typeof raw.planets === "object" && !Array.isArray(raw.planets) ? raw.planets : {};
+      const vm = { computedAt: dailyText(raw?.computed_at), planets };
+      transitCache = { at: Date.now(), data: vm };
+      res.json(vm);
     } catch (err) {
       sendError(res, err);
     }

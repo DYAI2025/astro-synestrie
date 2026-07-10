@@ -22,6 +22,7 @@ vi.mock("../utils/fufireClient", () => {
       postTst: vi.fn(),
       postBaziDayun: vi.fn(),
       getWuxingMapping: vi.fn(),
+      getTransitNow: vi.fn(),
       getHealth: vi.fn(),
       postExperienceBootstrap: vi.fn(),
       postExperienceDaily: vi.fn(),
@@ -53,7 +54,7 @@ vi.mock("../utils/mapsService", () => {
 
 import { FuFirEClient } from "../utils/fufireClient";
 import { getPlaceDetails, getTimezone, getAutocompletePredictions } from "../utils/mapsService";
-import { clearBootstrapCache, createApp } from "./app";
+import { clearBootstrapCache, clearTransitCache, createApp } from "./app";
 
 const app = createApp();
 
@@ -82,6 +83,8 @@ beforeEach(() => {
   // Der Bootstrap-Cache lebt modulweit — ohne Reset maskieren sich die
   // Daily-Tests gegenseitig (Mock-Payloads/502-Fälle sähen gecachte Daten).
   clearBootstrapCache();
+  // Auch der Transit-Cache lebt modulweit — gleiche Maskierungsgefahr.
+  clearTransitCache();
   (FuFirEClient.probeHealth as any).mockResolvedValue("ok");
   (FuFirEClient.isConfigured as any).mockReturnValue({ url: true, key: true });
   (FuFirEClient.getPathPrefix as any).mockReturnValue("v1");
@@ -382,6 +385,35 @@ describe("POST /api/azodiac/daily", () => {
     expect(res.status).toBe(200);
     expect(res.body.available).toBe(false);
     expect(res.body.source).toBe("missing");
+  });
+});
+
+describe("GET /api/azodiac/transit/now", () => {
+  it("liefert Planeten mit rohem 0-Index-Sektor durch (Labeling ist Client-Sache)", async () => {
+    (FuFirEClient.getTransitNow as any).mockResolvedValue({
+      computed_at: "2026-07-10T18:17:09Z",
+      planets: { sun: { longitude: 108.5, sector: 3, sign: "cancer", speed: 0.95 } },
+    });
+    const res = await request(app).get("/api/azodiac/transit/now");
+    expect(res.status).toBe(200);
+    expect(res.body.planets.sun).toEqual({ longitude: 108.5, sector: 3, sign: "cancer", speed: 0.95 });
+    expect(res.body.computedAt).toBe("2026-07-10T18:17:09Z");
+  });
+
+  it("cached 10 Minuten (zweiter Call ohne zweiten Upstream-Call)", async () => {
+    (FuFirEClient.getTransitNow as any).mockResolvedValue({ computed_at: "t", planets: {} });
+    await request(app).get("/api/azodiac/transit/now");
+    await request(app).get("/api/azodiac/transit/now");
+    expect(FuFirEClient.getTransitNow).toHaveBeenCalledTimes(1);
+  });
+
+  it("mappt Upstream-Fehler auf den Standard-Fehlerpfad ohne zu cachen", async () => {
+    (FuFirEClient.getTransitNow as any).mockRejectedValue({ httpStatus: 502, code: "fufire_unavailable", message: "x" });
+    const res1 = await request(app).get("/api/azodiac/transit/now");
+    expect(res1.status).toBe(502);
+    (FuFirEClient.getTransitNow as any).mockResolvedValue({ computed_at: "t2", planets: {} });
+    const res2 = await request(app).get("/api/azodiac/transit/now");
+    expect(res2.status).toBe(200); // Fehler wurde NICHT gecacht
   });
 });
 
