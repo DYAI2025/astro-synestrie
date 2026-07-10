@@ -52,7 +52,7 @@ vi.mock("../utils/mapsService", () => {
 
 import { FuFirEClient } from "../utils/fufireClient";
 import { getPlaceDetails, getTimezone, getAutocompletePredictions } from "../utils/mapsService";
-import { createApp } from "./app";
+import { clearBootstrapCache, createApp } from "./app";
 
 const app = createApp();
 
@@ -78,6 +78,9 @@ const FULL_CHART = {
 const ORIGINAL_ENV = { ...process.env };
 beforeEach(() => {
   vi.clearAllMocks();
+  // Der Bootstrap-Cache lebt modulweit — ohne Reset maskieren sich die
+  // Daily-Tests gegenseitig (Mock-Payloads/502-Fälle sähen gecachte Daten).
+  clearBootstrapCache();
   (FuFirEClient.probeHealth as any).mockResolvedValue("ok");
   (FuFirEClient.isConfigured as any).mockReturnValue({ url: true, key: true });
   (FuFirEClient.getPathPrefix as any).mockReturnValue("v1");

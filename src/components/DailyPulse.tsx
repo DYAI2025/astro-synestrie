@@ -16,11 +16,19 @@ import {
   MessageSquareQuote
 } from "lucide-react";
 import { motion } from "motion/react";
+import TagespulsV2 from "./daily/TagespulsV2";
 
 interface DailyPulseProps {
   viewModel: ProfileViewModel;
   birthData: BirthData;
 }
+
+/**
+ * Feature-Flag Tagespuls 2.0 ("Muster-Spiegel an der Signatur"): baut die
+ * Tagesansicht auf Perturbation + Tagestyp + Wiedererkennung + Begegnungswahl
+ * um. Build-Zeit-Flag (VITE_*), Rollout via Railway-Var + Dockerfile-ARG.
+ */
+const TAGESPULS_V2_ENABLED = import.meta.env.VITE_TAGESPULS_V2 === "true";
 
 /** Tagesnavigation is bounded to ±7 days around today (engine target_date window). */
 const MAX_DAY_OFFSET = 7;
@@ -106,6 +114,13 @@ function SectionCard({ testId, title, icon, section, reference, extraText }: Sec
 }
 
 export default function DailyPulse({ birthData }: DailyPulseProps) {
+  if (TAGESPULS_V2_ENABLED) {
+    return <TagespulsV2 birthData={birthData} />;
+  }
+  return <DailyPulseV1 birthData={birthData} />;
+}
+
+function DailyPulseV1({ birthData }: { birthData: BirthData }) {
   const [pulseData, setPulseData] = React.useState<DailyPulseResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);

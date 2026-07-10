@@ -48,6 +48,22 @@ export interface DailyPulseEastern extends DailyPulseSection {
  * action as its own Impuls, push groundwork and jieqi/weekday context notes.
  * No invented metrics.
  */
+/** Tagespuls 2.0 — westliche Rohanker (Sektoren-Indizes roh, Labeling ist Etappe 2). */
+export interface DailyWestEvidence {
+  transitSectors: number[];
+  natalFocus: string[];
+}
+
+/** Tagespuls 2.0 — Natal-Profil + stabile 5D-Signatur aus dem Bootstrap. */
+export interface DailyNatal {
+  sunSign: string | null;
+  moonSign: string | null;
+  ascendantSign: string | null;
+  dayMaster: string | null;
+  harmonyIndex: number | null;
+  elements: Record<string, number> | null;
+}
+
 export interface DailyPulseResponse {
   date: string;
   western: DailyPulseSection | null;
@@ -61,6 +77,10 @@ export interface DailyPulseResponse {
   description: string | null;
   source: "fufire" | "missing";
   available: boolean;
+  /** Tagespuls 2.0 — optional: null/fehlend, wenn Engine oder älterer BFF sie nicht liefert. */
+  westEvidence?: DailyWestEvidence | null;
+  natal?: DailyNatal | null;
+  qualityFlags?: Record<string, unknown> | null;
 }
 
 export interface PlacePrediction {
