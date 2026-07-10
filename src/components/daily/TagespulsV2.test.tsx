@@ -142,6 +142,18 @@ describe("TagespulsV2 — Kernritual", () => {
     await render(vmFixture({ available: false, source: "missing", western: null, eastern: null, description: null }));
     expect(q('[data-testid="daily-missing"]')).not.toBeNull();
   });
+
+  it("verortet die West-Sektoren mit Lebensbereich-Labels (0-Index normalisiert)", async () => {
+    await render(vmFixture()); // westEvidence.transitSectors: [2, 0]
+    const loc = q('[data-testid="daily-west-sectors"]');
+    expect(loc?.textContent).toContain("3 · Kommunikation & nahes Umfeld");
+    expect(loc?.textContent).toContain("1 · Selbst & Auftreten");
+  });
+
+  it("rendert die Sektor-Zeile NICHT, wenn kein Sektor ein bekanntes Label hat", async () => {
+    await render(vmFixture({ westEvidence: { transitSectors: [99], natalFocus: ["sun"] } }));
+    expect(q('[data-testid="daily-west-sectors"]')).toBeNull();
+  });
 });
 
 describe("Wording-Gate für daily/ (Top-Level-Scanner erfasst Unterverzeichnisse nicht)", () => {

@@ -30,6 +30,7 @@ import {
   lastReactionForType,
   saveReflection,
 } from "../../utils/daily/reflectionStore";
+import { sectorLabel } from "../../utils/daily/sectorLabels";
 
 /**
  * TagespulsV2 — "Muster-Spiegel an der Signatur" (Etappe 1).
@@ -472,6 +473,12 @@ export default function TagespulsV2({ birthData }: TagespulsV2Props) {
                 <p className="font-sans text-sm text-stone-300 leading-relaxed font-light">{pulseData.western.summary}</p>
               ) : (
                 <p className="text-sm text-stone-400">Für diesen Tag liegt keine westliche Färbung vor.</p>
+              )}
+              {/* Sektoren-Verortung: nur bekannte Labels — kein Label, keine Zeile */}
+              {(westEvidence?.transitSectors ?? []).some((s) => sectorLabel(s)) && (
+                <p className="font-mono text-[10px] text-stone-500" data-testid="daily-west-sectors">
+                  Aktivierte Bereiche: {(westEvidence!.transitSectors).map(sectorLabel).filter(Boolean).join(" · ")}
+                </p>
               )}
               {/* Ehrlichkeit als Interface: leerer Aszendent-Sitz bei fehlender Geburtszeit */}
               {natal && !natal.ascendantSign && (
