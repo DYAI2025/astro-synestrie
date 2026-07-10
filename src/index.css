@@ -223,3 +223,34 @@ body {
   }
 }
 
+
+/* ── ElevenLabs ConvAI widget (Eve & Levi) — immer im Vordergrund ─────────
+   Das Widget rendert Popups (Mikrofon-Dialog, Call-Screen) im Shadow DOM
+   und hängt Overlays teils direkt an <body>. Nichts aus unserer UI darf
+   es überdecken oder abschneiden. z-index 2147483647 = Browser-Maximum.
+   Muster übernommen von bazodiac.space (Astro-Noctum index.css).          */
+elevenlabs-convai {
+  position: fixed !important;
+  bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+  right: 16px !important;
+  z-index: 2147483647 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+elevenlabs-convai iframe,
+div[id^="elevenlabs"],
+div[class*="elevenlabs"] {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
+
+/* Body-Level-Overlays des ElevenLabs-SDK: max z-index + klickbar.
+   position wird NICHT überschrieben — das SDK positioniert selbst. */
+body > div[class*="eleven"],
+body > div[id*="eleven"],
+body > div[class*="convai"],
+body > div[id*="convai"] {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}

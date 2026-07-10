@@ -15,6 +15,7 @@ import DailyPulse from "./components/DailyPulse";
 import Synastry from "./components/Synastry";
 import Methodology from "./components/Methodology";
 import LandingPage from "./components/landing/LandingPage";
+import AgentWidget from "./components/AgentWidget";
 import { Sparkles, RefreshCw, Compass } from "lucide-react";
 
 export default function App() {
@@ -152,19 +153,25 @@ export default function App() {
   };
 
   return (
-    <PageShell
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      hasBirthData={!!viewModel}
-      headerSlot={
-        <AccountMenu
-          birthData={birthData}
-          hasResult={!!viewModel}
-          onProfileLoad={handleProfileLoad}
-        />
-      }
-    >
-      {renderTab()}
-    </PageShell>
+    <>
+      <PageShell
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        hasBirthData={!!viewModel}
+        headerSlot={
+          <AccountMenu
+            birthData={birthData}
+            hasResult={!!viewModel}
+            onProfileLoad={handleProfileLoad}
+          />
+        }
+      >
+        {renderTab()}
+      </PageShell>
+      {/* Sprach-Agenten (Eve & Levi): global schwebend, aber nicht auf der Landing —
+          dort bleibt der Einstieg bewusst ruhig. Ohne konfigurierte Agent-IDs
+          rendert das Widget nichts. */}
+      {activeTab !== "landing" && <AgentWidget viewModel={viewModel} />}
+    </>
   );
 }
