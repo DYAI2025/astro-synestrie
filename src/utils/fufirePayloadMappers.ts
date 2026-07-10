@@ -206,6 +206,30 @@ export function buildBootstrapPayload(input: ValidatedBirthInput): BootstrapRequ
 }
 
 /**
+ * Dayun braucht sex_at_birth für die Laufrichtung (direction_method
+ * year_stem_yinyang_and_sex; ohne → 422 direction_basis_missing, live
+ * verifiziert 2026-07-10). "Divers"/unbekannt ⇒ null — die Route liefert
+ * dann einen ehrlichen Missing-State statt einer erfundenen Richtung.
+ */
+export function buildDayunPayload(input: ValidatedBirthInput): DayunRequestPayload | null {
+  const g = (input.gender || "").toLowerCase();
+  const sex = g === "männlich" || g === "male" ? "male"
+    : g === "weiblich" || g === "female" ? "female"
+    : null;
+  if (!sex) return null;
+  return {
+    // Live-verifiziertes Schema: Minutenpräzision "YYYY-MM-DDTHH:mm" —
+    // bewusst NICHT localIsoDatetime, das hängt ":00"-Sekunden an.
+    date: `${input.birthDate}T${input.birthTime}`,
+    tz: input.tz,
+    lat: input.lat,
+    lon: input.lon,
+    sex_at_birth: sex,
+    direction_method: "year_stem_yinyang_and_sex"
+  };
+}
+
+/**
  * DailyRequest requires 12 soulprint sectors AND 12 quiz sectors. The
  * soulprint sectors come from the engine's own /v1/experience/bootstrap
  * response — never fabricated locally. The app has no quiz feature, so the
