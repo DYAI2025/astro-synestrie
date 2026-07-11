@@ -1,5 +1,6 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
+import { randomUUID } from "node:crypto";
 import { getServerSupabase } from "./supabase";
 import { requireUserAuth } from "./requireUserAuth";
 import { GoogleGenAI } from "@google/genai";
@@ -32,6 +33,7 @@ import { compareProfiles } from "../utils/synastry";
 import { fuseElementalWeights, derivePairAxes } from "../utils/tensionPair";
 import { computeInterAspects, bodyPositionsFromViewModel } from "../utils/interAspects";
 import { compareBaziPillars } from "../utils/baziCompare";
+import { CouncilEntry, DayPulseMode, councilOfSix, deriveIntensity, deriveMode } from "../utils/daily/dayPulse";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -93,9 +95,20 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 /** Send a typed error, never leaking secrets or stack traces to the browser. */
 function sendError(res: Response, err: any, fallbackStatus = 500): void {
   const status = err && typeof err.httpStatus === "number" ? err.httpStatus : fallbackStatus;
+  // API-DP-005 (PRD Day Pulse): typisierte Fehler tragen retryable + correlationId.
+  // retryable folgt der Status-Semantik (transiente Upstream-/Limit-Fehler),
+  // explizites err.retryable gewinnt. Die correlationId landet auch im Log,
+  // damit Nutzer-Reports serverseitig auffindbar sind — nie Stacktraces nach außen.
+  const retryable = typeof err?.retryable === "boolean"
+    ? err.retryable
+    : status === 429 || status === 502 || status === 503 || status === 504;
+  const correlationId = randomUUID();
+  console.error("api_error", { correlationId, status, code: (err && err.code) || "internal_error" });
   res.status(status).json({
     error: (err && err.code) || "internal_error",
-    message: err && err.message ? String(err.message) : "Unerwarteter Fehler."
+    message: err && err.message ? String(err.message) : "Unerwarteter Fehler.",
+    retryable,
+    correlationId
   });
 }
 
@@ -172,6 +185,10 @@ interface DailyPulseVM {
   westEvidence: DailyWestEvidenceVM | null;
   natal: DailyNatalVM | null;
   qualityFlags: Record<string, unknown> | null;
+  /** PRD Day Pulse Stufe 1 — FR-DP-001/002/008: serverseitig, deterministisch. */
+  mode: DayPulseMode | null;
+  intensity: number | null;
+  council: CouncilEntry[] | null;
 }
 
 function dailyText(v: unknown): string | null {
@@ -281,6 +298,7 @@ function normalizeDaily(daily: any, bootstrap?: unknown): DailyPulseVM {
 
   // Available = the engine delivered real user-facing content for the day.
   const available = Boolean(description || western || eastern);
+  const natal = extractNatal(bootstrap);
   return {
     date: dailyText(d.date) || dailyText(d.target_date) || new Date().toISOString().split("T")[0],
     western,
@@ -295,8 +313,22 @@ function normalizeDaily(daily: any, bootstrap?: unknown): DailyPulseVM {
     source: available ? "fufire" : "missing",
     available,
     westEvidence: westEvidence && (westEvidence.transitSectors.length || westEvidence.natalFocus.length) ? westEvidence : null,
-    natal: extractNatal(bootstrap),
-    qualityFlags
+    natal,
+    qualityFlags,
+    // FR-DP-001/002: Mode + Intensität deterministisch aus dem autoritativen
+    // Harmony-Index; FR-DP-008: Rat der Sechs als sechs stabile Sitze mit
+    // availability + Grund. Kein Index / kein Profil → ehrlich null.
+    mode: deriveMode(natal?.harmonyIndex),
+    intensity: deriveIntensity(natal?.harmonyIndex),
+    council: natal
+      ? councilOfSix({
+          sunSign: natal.sunSign,
+          moonSign: natal.moonSign,
+          ascendantSign: natal.ascendantSign,
+          dayMaster: natal.dayMaster,
+          elements: natal.elements
+        })
+      : null
   };
 }
 

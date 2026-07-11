@@ -215,6 +215,44 @@ describe("POST /api/azodiac/daily", () => {
     expect(res.body.description).toBe("Von FuFirE geliefert.");
   });
 
+  it("derives Day-Pulse mode/intensity from the bootstrap Harmony-Index and ships the Council of Six (FR-DP-001/002/008)", async () => {
+    (FuFirEClient.postExperienceBootstrap as any).mockResolvedValue({
+      soulprint_sectors: SECTORS,
+      profile: { sun_sign: "Zwillinge", moon_sign: "Stier", ascendant_sign: "Waage", day_master: "Yi", harmony_index: 0.7498 },
+      signature_blueprint: { elements: { Holz: 0.575, Feuer: 0.37, Erde: 0.41, Metall: 0.2, Wasser: 0.29 } }
+    });
+    (FuFirEClient.postExperienceDaily as any).mockResolvedValue({ description: "Tag." });
+    const res = await request(app).post("/api/azodiac/daily").send(VALID_BODY);
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe("trace"); // H = 0.7498 >= 0.50
+    expect(res.body.intensity).toBeCloseTo((0.7498 - 0.45) / 0.55, 8);
+    expect(res.body.council).toHaveLength(6);
+    expect(res.body.council.map((c: any) => c.key)).toEqual(["sun", "moon", "ascendant", "day_master", "year_animal", "dominant_wuxing"]);
+    const moon = res.body.council.find((c: any) => c.key === "moon");
+    expect(moon.available).toBe(true);
+    expect(moon.value).toBe("Stier");
+    const yearAnimal = res.body.council.find((c: any) => c.key === "year_animal");
+    expect(yearAnimal.available).toBe(false);
+    expect(yearAnimal.unavailableReason).toMatch(/./);
+  });
+
+  it("without Harmony-Index mode/intensity stay honestly null (FR-DP-001/002)", async () => {
+    (FuFirEClient.postExperienceBootstrap as any).mockResolvedValue({ soulprint_sectors: SECTORS });
+    (FuFirEClient.postExperienceDaily as any).mockResolvedValue({ description: "Tag." });
+    const res = await request(app).post("/api/azodiac/daily").send(VALID_BODY);
+    expect(res.body.mode).toBeNull();
+    expect(res.body.intensity).toBeNull();
+    expect(res.body.council).toBeNull();
+  });
+
+  it("typed errors carry retryable + correlationId (API-DP-005)", async () => {
+    (FuFirEClient.postExperienceBootstrap as any).mockRejectedValue({ httpStatus: 502, code: "fufire_unavailable", message: "x" });
+    const res = await request(app).post("/api/azodiac/daily").send(VALID_BODY);
+    expect(res.status).toBe(502);
+    expect(res.body.retryable).toBe(true); // 502 = transient
+    expect(res.body.correlationId).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
   it("maps the FULL engine DailyResponse into the view model (no ghost metrics)", async () => {
     (FuFirEClient.postExperienceBootstrap as any).mockResolvedValue({ soulprint_sectors: SECTORS });
     (FuFirEClient.postExperienceDaily as any).mockResolvedValue({

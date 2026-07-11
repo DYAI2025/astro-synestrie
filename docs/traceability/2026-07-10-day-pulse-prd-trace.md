@@ -14,14 +14,14 @@ FR-DP-014) und ein RLS-Musterabweichler sind PO-Entscheidungen.
 
 | FR | Vorgabe (kurz) | Status | Befund |
 |---|---|---|---|
-| FR-DP-001 | Mode aus H: spannung <0.45, pulse 0.45–0.50, trace ≥0.50 | ❌ fehlt | `natal.harmonyIndex` wird seit Etappe 1 durchgereicht (live 0.7498 → wäre `trace`), aber keine Mode-Ableitung. Trivial nachrüstbar (pure function, BFF). |
-| FR-DP-002 | intensity = clamp(\|H−0.45\|/0.55, 0, 1), nie vom LLM | ❌ fehlt | Keine intensity-Berechnung. Ebenfalls trivial (gleiche Stelle wie FR-001). |
+| FR-DP-001 | Mode aus H: spannung <0.45, pulse 0.45–0.50, trace ≥0.50 | ✅ (Stufe 1, 2026-07-11) | `natal.harmonyIndex` wird seit Etappe 1 durchgereicht (live 0.7498 → wäre `trace`), aber keine Mode-Ableitung. Trivial nachrüstbar (pure function, BFF). |
+| FR-DP-002 | intensity = clamp(\|H−0.45\|/0.55, 0, 1), nie vom LLM | ✅ (Stufe 1) | Keine intensity-Berechnung. Ebenfalls trivial (gleiche Stelle wie FR-001). |
 | FR-DP-003 | Slot 1 nur aus approved Aphorismen, Sprach-Text non-empty, Mode-Tag | ❌ fehlt | Kein Aphorismen-Korpus. Jury-Synthese hatte Aphorismen (audit-gated) bewusst in Etappe 3 — PRD macht sie zum Phase-1-Kern. Geist identisch (nur geprüfter Bestand, „lieber kein Satz als ein falscher" ≙ FR-DP-012). |
 | FR-DP-004 | Cooldown, Affinity, deterministischer Top-5-Seed (user+local_date), same-day reuse | ❌ fehlt | Kein Assignment-Konzept. Client cached pro Datum (UI-Cache), erfüllt aber weder Determinismus-über-Surfaces noch Persistenz. |
 | FR-DP-005 | Phase 1 = 3 Slots (Aphorismus 8–15 W, Bridge 10–20 W, Impuls 10–15 W; 30–50 gesamt) | ❌ fehlt | Stattdessen: Tagestyp-Frame (statisch, test-validiert) + Engine-Prosa. Keine generierten Slots. |
 | FR-DP-006 | Phase-0-Orientation (erklären/direkt), Wahl wird gespeichert | ❌ fehlt | Kein Orientation-Schritt. |
 | FR-DP-007 | Nach Phase 1 fragt der Agent, WER aus dem Rat arbeiten soll — **nie automatische Figurenwahl** | 🔴 **Konflikt** | `pickSpeaker` (src/utils/daily/dayTypeSelector.ts) wählt den Karten-Sprecher AUTOMATISCH (Day-Master → West-Archetyp → Dominantes Element; Gegenseite-Flip). Kontext verschieden (unsere Wahl = Karten-Label, PRD-Wahl = Phase-2-Einstieg), aber das PRD-Ritualprinzip „User wählt die Figur" ist nicht umgesetzt. |
-| FR-DP-008 | Council-Antwort: exakt 6 stabile Keys (sun/moon/ascendant/day_master/year_animal/dominant_wuxing) mit label, Wert, availability, unavailable_reason | ⚠️ teilweise | Geist voll da: „Schweigen ist Feature", leerer Aszendent-Sitz MIT Grund (`daily-ascendant-empty`). Aber keine explizite 6-Key-Struktur; moon/year_animal fehlen als Figuren — **obwohl die Daten vorhanden sind** (`natal.moonSign` im Daily-VM; Jahres-Säule im BaZi-Profil). |
+| FR-DP-008 | Council-Antwort: exakt 6 stabile Keys (sun/moon/ascendant/day_master/year_animal/dominant_wuxing) mit label, Wert, availability, unavailable_reason | ✅ Shape (Stufe 1; Wahl-Flow = Etappe 3) | Geist voll da: „Schweigen ist Feature", leerer Aszendent-Sitz MIT Grund (`daily-ascendant-empty`). Aber keine explizite 6-Key-Struktur; moon/year_animal fehlen als Figuren — **obwohl die Daten vorhanden sind** (`natal.moonSign` im Daily-VM; Jahres-Säule im BaZi-Profil). |
 | FR-DP-009 | Phase 2 nur nach expliziter Wahl, 50–90 W, 3–4 Sätze | ❌ fehlt | Keine LLM-Interpretation (bewusst: Jury-Entwurf ohne Generierung). |
 | FR-DP-010 | Mode-Figurenregeln (pulse: +1–3 Figuren; trace: nur gewählte; spannung: +genau 1, temporal) | ❌ fehlt | Folgt aus FR-009. |
 | FR-DP-011 | Backend validiert Bridge/Impuls/Phase-2 (Länge, Bann-Vokabular, Figuren-Zahl, Mode) | ❌ (n/a) | Keine Generierung → nichts zu validieren. Verwandtschaft: unsere STATISCHEN Texte sind durch Wording-Gates test-validiert (wordingHonesty, VERDICT-Regex in weeklyObservations.test) — dieselbe Bann-Vokabular-Idee, build-time statt runtime. |
@@ -49,7 +49,7 @@ FR-DP-014) und ein RLS-Musterabweichler sind PO-Entscheidungen.
 | API-DP-002 `POST /api/agent/daily/interpretation` (Phase 2) | ❌ fehlt |
 | API-DP-003 gemeinsamer Domain-Service für experience/daily + agent/daily | ❌ fehlt |
 | API-DP-004 `POST /api/agent/conversation` day_pulse-Metadaten, Hypothesen-Reject | ❌ fehlt |
-| API-DP-005 Typed errors: code, safe message, **retryable**, **correlation_id** | ⚠️ code+message ✅ (sendError); retryable + correlation_id fehlen |
+| API-DP-005 Typed errors: code, safe message, **retryable**, **correlation_id** | ✅ (Stufe 1: sendError erweitert, correlationId geloggt) |
 
 ## Schema-Abgleich (`day_pulse_schema (1).sql`)
 
@@ -59,7 +59,7 @@ FR-DP-014) und ein RLS-Musterabweichler sind PO-Entscheidungen.
 | `daily_aphorism_assignments` (1/user/local_date, seed_hash, harmony_index, intensity) | ❌ fehlt | |
 | `daily_pulse_sessions` (Phase 0–2, chosen_figure, Wortzahl-Checks, idempotency_key) | ❌ fehlt | |
 | `daily_pulse_events` (append-only, event_key unique) | ❌ fehlt | |
-| — unsere `nb_daily_reflections` | ➕ additiv | Kollidiert NICHT (anderes Objekt: user-authored Reflexionen ≙ FR-DP-013-erlaubt). **Aber RLS-Musterabweichung:** PRD schreibt bewusst NUR select-Policies (Writes ausschließlich server-side/Service-Role); unsere Migration legt zusätzlich owner insert/update/delete-Policies an → erlaubt theoretisch direkte Client-Writes am BFF vorbei (Validierung umgangen). **Empfehlung: auf select-only angleichen** (Service-Role bypasst RLS ohnehin). |
+| — unsere `nb_daily_reflections` | ➕ additiv | Kollidiert NICHT (anderes Objekt: user-authored Reflexionen ≙ FR-DP-013-erlaubt). **Aber RLS-Musterabweichung:** PRD schreibt bewusst NUR select-Policies (Writes ausschließlich server-side/Service-Role); unsere Migration legt zusätzlich owner insert/update/delete-Policies an → erlaubt theoretisch direkte Client-Writes am BFF vorbei (Validierung umgangen). **Erledigt (Stufe 1): Migration auf select-only gekürzt** (Writes nur via BFF/Service-Role). |
 
 ## Konvergenz-Pfad (Vorschlag, PO-Entscheidung)
 
@@ -70,4 +70,4 @@ Das PRD ist verbindlicher User-Input und detaillierter als die Jury-Synthese. Vo
 3. **Aphorismus-Kern (FR-003–005, 009–012):** PRD-Schema 1:1 übernehmen, DailyPulseService im BFF (FR-014), `/api/agent/daily`-Endpunkte für Eve/Levi (API-001–003), Phase-2-Generierung mit Backend-Validierung (FR-011). Größtes Paket; ersetzt den bisherigen Etappe-3/4-Plan.
 4. **Bestehendes bleibt:** Wiedererkennungs-Tap/Begegnungswahl/Wochenbogen sind FR-DP-013-konforme user-authored Hooks und können als eigenständige Ebene neben dem Aphorismus-Ritual weiterleben — oder werden in `daily_pulse_events`/Sessions integriert (PO-Frage).
 
-**Score:** 2 ✅ · 2 🔴 Konflikt · 5 ⚠️ teilweise · 19 ❌ fehlt (überwiegend das ungebaute Aphorismus-Ritual).
+**Score nach Stufe 1 (2026-07-11):** 6 ✅ · 2 🔴 Konflikt (FR-007/014 → Etappe 3) · 4 ⚠️ · 16 ❌ (Aphorismus-Ritual = Etappe 3).

@@ -81,6 +81,16 @@ export interface DailyPulseResponse {
   westEvidence?: DailyWestEvidence | null;
   natal?: DailyNatal | null;
   qualityFlags?: Record<string, unknown> | null;
+  /** PRD Day Pulse Stufe 1 — Mode/Intensität aus Harmony-Index + Rat der Sechs mit availability. */
+  mode?: "spannung" | "pulse" | "trace" | null;
+  intensity?: number | null;
+  council?: {
+    key: "sun" | "moon" | "ascendant" | "day_master" | "year_animal" | "dominant_wuxing";
+    label: string;
+    value: string | null;
+    available: boolean;
+    unavailableReason: string | null;
+  }[] | null;
 }
 
 /** Ein 10-Jahres-Zyklus (Dekaden-Säule) aus dem BFF /api/azodiac/bazi/dayun. Alle Felder honest-nullable. */
