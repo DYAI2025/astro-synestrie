@@ -1,0 +1,12 @@
+=== FINAL VALIDATION RUN ===
+Goal characters: 3604/3999
+Task count: 18
+Plan validation passed
+PASS: PRD output
+PASS: SARIF structure
+PACK VALIDATION: PASS
+required_files=12
+decisions=8
+PASS: PRD JSON validates against Draft 2020-12 schema
+PASS: unique IDs, valid trace references, P0 traceability, key plan invariants and stale-term checks
+INFO: PRD IDs=145 traceability rows=27
