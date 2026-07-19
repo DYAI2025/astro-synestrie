@@ -1,0 +1,67 @@
+WESTERN SYNASTRY MVP V2.1 - VALIDATION REPORT
+Date: 2026-07-19
+
+1) Writing Plans validator
+Command:
+  python /home/oai/skills/writing-plans/scripts/validate_plan.py /mnt/data/western-synastry-v2/docs/plans/2026-07-19-western-synastry-mvp-throughline.md
+Result:
+  Goal characters: 3604/3999
+  Task count: 18
+  Plan validation passed
+
+2) AI-Native PRD output validator
+Command:
+  python /home/oai/skills/ai-native-prd-architect/scripts/validate_prd_output.py /mnt/data/western-synastry-v2/docs/prd/prd_report.json
+Result:
+  PASS: PRD output
+
+3) PRD JSON Schema validation
+Schema:
+  /home/oai/skills/ai-native-prd-architect/schemas/prd-output.schema.json
+Result:
+  PASS: PRD JSON validates against Draft 2020-12 schema
+
+4) SARIF validator
+Command:
+  python /home/oai/skills/ai-native-prd-architect/scripts/validate_sarif.py /mnt/data/western-synastry-v2/docs/prd/code_findings.sarif.json
+Result:
+  PASS: SARIF structure
+
+5) Package validator
+Command:
+  python /mnt/data/western-synastry-v2/scripts/validate_pack.py /mnt/data/western-synastry-v2
+Result:
+  PACK VALIDATION: PASS
+  required_files=12
+  decisions=8
+
+6) Cross-document validator
+Checks:
+  - unique PRD IDs
+  - all traceability references resolve
+  - all P0 functional/API/architecture/security requirements have traceability rows
+  - key plan invariants exist
+  - stale mocked-browser and old stability terms are absent
+Result:
+  PASS: unique IDs, valid trace references, P0 traceability, key plan invariants and stale-term checks
+  PRD IDs=145
+  traceability rows=27
+
+EVIDENCE CLASS
+- Documents: structure/schema validated
+- Repository facts: source-inspected
+- Runtime: unverified
+
+NOT RUN / NOT PROVEN
+- npm install / npm test / npm run lint / npm run build against an implemented change
+- Playwright against a running implementation
+- real Supabase authentication/profile persistence
+- real FuFirE staging request
+- usability sessions
+- astrology-domain approval
+- public production readiness
+
+READINESS
+- TASK-001 through TASK-013: ready for coding-agent execution from the inspected source baseline.
+- TASK-014 through TASK-015: require staging auth/profile/FuFirE credentials and runtime environment.
+- TASK-017 onward: blocked until Human Usability Gate.

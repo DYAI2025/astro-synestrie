@@ -1,0 +1,3023 @@
+{
+  "meta": {
+    "skill_name": "ai-native-prd-architect",
+    "mode": "full_prd",
+    "date_or_timestamp_basis": "2026-07-19 user session",
+    "version": "2.1",
+    "schema_version": "ai-native-prd-output-v1.1",
+    "output_artifacts": [
+      "prd_report.md",
+      "prd_report.json",
+      "code_findings.sarif.json",
+      "implementation plan",
+      "coding-agent handoff"
+    ]
+  },
+  "intake_scope": {
+    "user_goal": "Integrate the eight decisions into an executable Western-Synastry implementation plan and create a validated coding-agent PRD.",
+    "task_type": "repo_aware_prd + implementation_plan + agent_handoff",
+    "in_scope": [
+      "New_Bazi real-data MVP through-line",
+      "existing FuFirE Western endpoint",
+      "consent attestation",
+      "time-window uncertainty",
+      "frontend product analysis",
+      "TDD/E2E/usability gates"
+    ],
+    "out_of_scope": [
+      "new FuFirE match endpoint",
+      "payments/entitlements",
+      "partner persistence",
+      "LLM narrative",
+      "public production release claim"
+    ],
+    "missing_inputs": [
+      "MISSING: staging credentials",
+      "MISSING: final product name",
+      "MISSING: final astrology/privacy copy review"
+    ],
+    "assumptions": [
+      "ASSUMPTION: time-band-v1 boundaries",
+      "ASSUMPTION: five moderated usability sessions"
+    ]
+  },
+  "source_inventory": [
+    {
+      "source_id": "SRC-USER-001",
+      "source_type": "user_provided",
+      "title": "Western-Synastry Web-App request and palette",
+      "location": "conversation + assets/pastel-olive.jpg",
+      "claim_supported": "Product intent, simple Apple-like UX and palette.",
+      "evidence_pointer": "User request 2026-07-19 and attached palette image.",
+      "confidence": 5,
+      "verification_status": "user_confirmed"
+    },
+    {
+      "source_id": "SRC-USER-002",
+      "source_type": "user_provided",
+      "title": "Eight sequential product and architecture decisions",
+      "location": "conversation 2026-07-19",
+      "claim_supported": "Eight confirmed decisions: consent attestation, day-part windows, visible uncertainty, frontend dimensions, frontend normalization, vertical TDD slices, early real E2E and real-data MVP.",
+      "evidence_pointer": "DEC-20260719-01 through DEC-20260719-08; TECH-INV items are review-derived controls.",
+      "confidence": 5,
+      "verification_status": "user_confirmed"
+    },
+    {
+      "source_id": "SRC-REPO-NB-001",
+      "source_type": "repository_evidence",
+      "title": "New_Bazi repository",
+      "location": "New_Bazi-main (1).zip",
+      "claim_supported": "Existing BFF, profile routes, local synastry, tests and UI stack.",
+      "evidence_pointer": "src/server/app.ts; src/utils/synastry.ts; src/utils/birthInputValidation.ts; tests/e2e.",
+      "confidence": 5,
+      "verification_status": "source_inspected"
+    },
+    {
+      "source_id": "SRC-REPO-FF-001",
+      "source_type": "repository_evidence",
+      "title": "FuFirE repository",
+      "location": "FuFirE-main (7).zip",
+      "claim_supported": "Existing /v1/calculate/western contract and pair-governance patterns.",
+      "evidence_pointer": "bazi_engine/routers/western.py; bazi_engine/routers/match.py; bazi_engine/routers/registry.py.",
+      "confidence": 5,
+      "verification_status": "source_inspected"
+    },
+    {
+      "source_id": "SRC-REVIEW-001",
+      "source_type": "user_provided",
+      "title": "Evidence and craftsmanship reviews of original plan",
+      "location": "western-synastry-plan-review.md; western-synastry-evidence-validation.md",
+      "claim_supported": "Original blockers and required corrections.",
+      "evidence_pointer": "Consent, unknown-time Moon, ownership, directionality, confidence, tasks and usability findings.",
+      "confidence": 4,
+      "verification_status": "source_inspected_and_rechecked"
+    },
+    {
+      "source_id": "SRC-STD-001",
+      "source_type": "standard_or_framework",
+      "title": "AI-Native PRD Architect output contract",
+      "location": "skills://ai-native-prd-architect",
+      "claim_supported": "PRD structure, traceability, security and artifact requirements.",
+      "evidence_pointer": "references/prd-output-contract.md and schemas/prd-output.schema.json.",
+      "confidence": 5,
+      "verification_status": "schema_source"
+    }
+  ],
+  "standards_alignment": [
+    {
+      "standard_id": "STD-COMMONMARK",
+      "name": "CommonMark",
+      "version": "0.31.2",
+      "applies_to": [
+        "prd_report.md",
+        "implementation plan"
+      ],
+      "alignment_status": "required",
+      "claim_level": "format_compatible",
+      "source_id": "SRC-STD-001",
+      "limitations": [
+        "No claim of formal certification."
+      ]
+    },
+    {
+      "standard_id": "STD-RFC8259",
+      "name": "RFC 8259 JSON",
+      "version": "RFC 8259",
+      "applies_to": [
+        "prd_report.json",
+        "code_findings.sarif.json"
+      ],
+      "alignment_status": "required",
+      "claim_level": "format_compatible",
+      "source_id": "SRC-STD-001",
+      "limitations": [
+        "JSON validity does not prove semantic correctness."
+      ]
+    },
+    {
+      "standard_id": "STD-JSONSCHEMA-2020-12",
+      "name": "JSON Schema",
+      "version": "Draft 2020-12",
+      "applies_to": [
+        "prd_report.json"
+      ],
+      "alignment_status": "required",
+      "claim_level": "schema_validated",
+      "source_id": "SRC-STD-001",
+      "limitations": [
+        "Validation checks structure, not runtime truth."
+      ]
+    },
+    {
+      "standard_id": "STD-SARIF-2.1.0",
+      "name": "SARIF",
+      "version": "2.1.0",
+      "applies_to": [
+        "code_findings.sarif.json"
+      ],
+      "alignment_status": "required_when_applicable",
+      "claim_level": "format_compatible",
+      "source_id": "SRC-STD-001",
+      "limitations": [
+        "Findings are static and repository-inspected only."
+      ]
+    },
+    {
+      "standard_id": "STD-29148",
+      "name": "ISO/IEC/IEEE 29148 requirements engineering",
+      "version": "2018",
+      "applies_to": [
+        "requirements",
+        "traceability"
+      ],
+      "alignment_status": "optional",
+      "claim_level": "standard_aligned",
+      "source_id": "SRC-STD-001",
+      "limitations": [
+        "Not certified or formally audited."
+      ]
+    }
+  ],
+  "risk_gate": {
+    "risk_level": "high",
+    "risk_reasons": [
+      "Processes personal birth data",
+      "Calls external calculation and auth/data boundaries",
+      "Consent cannot be independently verified",
+      "Time uncertainty can create misleading precision"
+    ],
+    "allowed_actions": [
+      "Implement feature-flagged MVP in a branch",
+      "Add tests and documentation",
+      "Run bounded staging smoke with approved credentials"
+    ],
+    "blocked_actions": [
+      "Public production launch without human review",
+      "Database migration",
+      "Automatic partner persistence",
+      "New FuFirE API standardization",
+      "Claiming real function from mocks"
+    ],
+    "human_review_required": true
+  },
+  "mode_selection": {
+    "mode": "full_prd",
+    "reason": "Repository-aware feature spans data, API, privacy, UX, testing, rollback and coding-agent handoff."
+  },
+  "artifact_policy": {
+    "always_emit": [
+      "prd_report.md"
+    ],
+    "always_emit_machine": [
+      "prd_report.json"
+    ],
+    "conditional_emit": [
+      "code_findings.sarif.json"
+    ],
+    "sarif_required_when_code_findings": true,
+    "standard_claim_policy": "standard_aligned_not_certified",
+    "markdown_format": "CommonMark-compatible Markdown",
+    "json_format": "RFC 8259 JSON"
+  },
+  "optional_artifacts": [
+    {
+      "artifact_name": "code_findings.sarif.json",
+      "format": "SARIF 2.1.0",
+      "required_when": "repository findings are included",
+      "status": "required",
+      "validator": "validate_sarif.py"
+    },
+    {
+      "artifact_name": "implementation plan",
+      "format": "Markdown",
+      "required_when": "coding agent execution is requested",
+      "status": "required",
+      "validator": "writing-plans validate_plan.py"
+    },
+    {
+      "artifact_name": "API-001 backlog ticket",
+      "format": "Markdown",
+      "required_when": "API promotion is deferred",
+      "status": "required",
+      "validator": "manual artifact review"
+    }
+  ],
+  "prd": {
+    "executive_summary": [
+      {
+        "id": "GOAL-001",
+        "type": "goal",
+        "statement": "Build a real-data Western-Synastry MVP through-line in New_Bazi using existing FuFirE Western calculations, with explicit uncertainty and no compatibility score.",
+        "source_ids": [
+          "SRC-USER-001",
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Real-boundary smoke plus user confirmation."
+      },
+      {
+        "id": "INFO-001",
+        "type": "scope_note",
+        "statement": "The PRD releases implementation of the MVP, not public production launch.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Quality gate and feature flag review."
+      }
+    ],
+    "problem_statement": [
+      {
+        "id": "INFO-002",
+        "type": "problem",
+        "statement": "The existing synastry flow mixes Western, BaZi and fusion logic and exposes a coarse percentage score; it does not provide a focused evidence-linked Western relationship experience.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "verified",
+        "priority": "p0",
+        "verification_method": "Repository inspection and DOM/API tests."
+      },
+      {
+        "id": "INFO-003",
+        "type": "problem",
+        "statement": "Unknown time is currently represented by a 12:00 placeholder, which must not be communicated as exact in the new product.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "verified",
+        "priority": "p0",
+        "verification_method": "Inspect validator and add relationship-specific tests."
+      }
+    ],
+    "goals_and_non_goals": [
+      {
+        "id": "GOAL-002",
+        "type": "goal",
+        "statement": "Deliver profile-to-result flow using real FuFirE calculations and a simplified evidence result.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "AC-005 and TEST-006."
+      },
+      {
+        "id": "GOAL-003",
+        "type": "goal",
+        "statement": "Support exact, approximate and unknown birth times with visible sampled uncertainty.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "AC-003 and AC-004."
+      },
+      {
+        "id": "NOGOAL-001",
+        "type": "non_goal",
+        "statement": "No new FuFirE match endpoint in the current MVP.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Architecture review."
+      },
+      {
+        "id": "NOGOAL-002",
+        "type": "non_goal",
+        "statement": "No payment, subscription, entitlement or marketplace implementation.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Scope review."
+      },
+      {
+        "id": "NOGOAL-003",
+        "type": "non_goal",
+        "statement": "No LLM narrative, Composite, Davison, transit, BaZi or Wu-Xing analysis.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Dependency and content review."
+      }
+    ],
+    "stakeholders_and_users": [
+      {
+        "id": "INFO-004",
+        "type": "user",
+        "statement": "Primary user: an authenticated person seeking reflective relationship patterns without a verdict.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Usability sessions."
+      },
+      {
+        "id": "INFO-005",
+        "type": "stakeholder",
+        "statement": "Product owner decides usability gate and public release.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Recorded human decision."
+      },
+      {
+        "id": "INFO-006",
+        "type": "stakeholder",
+        "statement": "Coding agent implements bounded slices; astrology reviewer approves rules and wording before public launch.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Handoff and review artifacts."
+      }
+    ],
+    "definitions_and_domain_glossary": [
+      {
+        "id": "TERM-001",
+        "type": "definition",
+        "statement": "Consent assertion: a user statement that the second person agreed; it is not independently verified.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Request/response wording review."
+      },
+      {
+        "id": "TERM-002",
+        "type": "definition",
+        "statement": "Sampled stability: stable requires all sampled pairs; provisional requires the canonical center pair plus at least ceil(totalPairs/2), and is not proof across every instant.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Algorithm tests and method copy."
+      },
+      {
+        "id": "TERM-003",
+        "type": "definition",
+        "statement": "Product dimension: frontend-owned grouping of evidence for user comprehension.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Import-boundary review."
+      },
+      {
+        "id": "TERM-004",
+        "type": "definition",
+        "statement": "Real-boundary smoke: test through running New_Bazi BFF to actual FuFirE and authenticated profile boundary without mocked upstream output.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Test runner configuration and evidence log."
+      }
+    ],
+    "assumptions_missing_open_questions": [
+      {
+        "id": "INFO-007",
+        "type": "assumption",
+        "statement": "ASSUMPTION: time-band-v1 uses five German day-part windows; sampling-v1 uses three anchors and a majority-plus-center provisional threshold.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "assumption",
+        "priority": "p1",
+        "verification_method": "Config/domain review; reversible without FuFirE change."
+      },
+      {
+        "id": "INFO-008",
+        "type": "assumption",
+        "statement": "ASSUMPTION: five moderated usability sessions are sufficient for the first qualitative gate.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "assumption",
+        "priority": "p2",
+        "verification_method": "Human research decision."
+      },
+      {
+        "id": "OPEN-001",
+        "type": "missing",
+        "statement": "MISSING: final product name and URL slug.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "missing",
+        "priority": "p3",
+        "verification_method": "Product owner decision."
+      },
+      {
+        "id": "OPEN-002",
+        "type": "missing",
+        "statement": "MISSING: staging credentials and exact real-boundary environment.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "missing",
+        "priority": "p0",
+        "verification_method": "Environment setup before TEST-006."
+      },
+      {
+        "id": "OPEN-003",
+        "type": "open_question",
+        "statement": "OPEN QUESTION: which dimensions survive usability review and become candidates for API promotion.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "needs_review",
+        "priority": "p1",
+        "verification_method": "Human gate after sessions."
+      },
+      {
+        "id": "INFO-011",
+        "type": "assumption",
+        "statement": "ASSUMPTION: generated samples use shift_forward for nonexistent local times and earlier for ambiguous times, while exact nonexistent input is rejected; every adjustment remains visible.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "assumption",
+        "priority": "p1",
+        "verification_method": "DST boundary tests and method review."
+      }
+    ],
+    "product_scope": [
+      {
+        "id": "INFO-009",
+        "type": "scope",
+        "statement": "MVP includes own-profile select/create, partner input, consent review, real calculation, simplified result and uncertainty method.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "E2E flow."
+      },
+      {
+        "id": "INFO-010",
+        "type": "scope",
+        "statement": "Post-gate scope includes six dimensions, detail, explorer, method and print.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Human gate before task activation."
+      }
+    ],
+    "user_journeys": [
+      {
+        "id": "JOURNEY-001",
+        "type": "journey",
+        "statement": "User signs in, selects or creates an owned profile, optionally refines an unknown own time for this analysis, then enters partner data and time precision.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Component and E2E tests."
+      },
+      {
+        "id": "JOURNEY-002",
+        "type": "journey",
+        "statement": "User reviews both data sets, confirms the consent assertion and starts calculation.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Route and UI tests."
+      },
+      {
+        "id": "JOURNEY-003",
+        "type": "journey",
+        "statement": "User reads three evidence-linked patterns, understands uncertainty and opens detail evidence.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Usability gate and E2E."
+      }
+    ],
+    "ai_ready_user_stories": [
+      {
+        "id": "STORY-001",
+        "type": "story",
+        "statement": "As an authenticated user, I can use an owner-filtered stored profile so I do not re-enter my own birth data and cannot reference another user’s profile.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "AC-001 and TEST-003."
+      },
+      {
+        "id": "STORY-002",
+        "type": "story",
+        "statement": "As a user with only a rough time, I can select a time band and see bounded uncertainty rather than a false exact time.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "AC-003 and TEST-002."
+      },
+      {
+        "id": "STORY-003",
+        "type": "story",
+        "statement": "As a user, I can see a small number of real calculated patterns with evidence instead of a score.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "AC-005 through AC-007."
+      },
+      {
+        "id": "STORY-004",
+        "type": "story",
+        "statement": "As a product owner, I can stop after the MVP and decide depth based on observed usability.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "AC-008 and Human Gate."
+      }
+    ],
+    "functional_requirements": [
+      {
+        "id": "FR-001",
+        "type": "functional",
+        "statement": "Select or create an own profile through existing authenticated routes; the relationship endpoint accepts personAProfileId and resolves it server-side with id + user_id.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-003, TEST-004 and TEST-006."
+      },
+      {
+        "id": "FR-002",
+        "type": "functional",
+        "statement": "Capture partner data without automatic persistence.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Storage spy and UI test."
+      },
+      {
+        "id": "FR-003",
+        "type": "functional",
+        "statement": "Require secondPersonConsentConfirmed=true and text version before upstream calculation.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-001."
+      },
+      {
+        "id": "FR-004",
+        "type": "functional",
+        "statement": "Support exact, approximate and unknown time modes; an unknown stored own profile may receive a request-scoped approximate override without persistent mutation.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-002."
+      },
+      {
+        "id": "FR-005",
+        "type": "functional",
+        "statement": "Create one or three real Western samples per person; provisional evidence requires the center pair and at least ceil(totalPairs/2) pair coverage.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-002, TEST-004, TEST-005 and TEST-006."
+      },
+      {
+        "id": "FR-006",
+        "type": "functional",
+        "statement": "Compute inter-aspect evidence, sampled stability and up to three patterns in the frontend.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-005."
+      },
+      {
+        "id": "FR-007",
+        "type": "functional",
+        "statement": "Show no compatibility score or relationship verdict.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-007."
+      },
+      {
+        "id": "FR-008",
+        "type": "functional",
+        "statement": "Preserve input on retry and back navigation.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Component and E2E tests."
+      },
+      {
+        "id": "FR-009",
+        "type": "functional",
+        "statement": "Block depth expansion until usability Human Gate.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Decision log review."
+      },
+      {
+        "id": "FR-010",
+        "type": "functional",
+        "statement": "The first MVP browser E2E traverses real auth/profile/BFF/FuFirE boundaries without route interception, canned upstream response or demo profile.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-006."
+      }
+    ],
+    "non_functional_requirements": [
+      {
+        "id": "NFR-001",
+        "type": "non_functional",
+        "statement": "Responsive at 320, 768 and 1440 CSS pixels without horizontal scrolling.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Playwright viewport test."
+      },
+      {
+        "id": "NFR-002",
+        "type": "non_functional",
+        "statement": "Keyboard accessible with visible focus and reduced-motion support.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "axe/manual review."
+      },
+      {
+        "id": "NFR-003",
+        "type": "non_functional",
+        "statement": "Maximum three upstream samples per person, six calls per request, bounded parallelism and existing compute-rate-limit coverage.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Route call-count test."
+      },
+      {
+        "id": "NFR-004",
+        "type": "non_functional",
+        "statement": "No new runtime dependency without explicit benefit, security and bundle review.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p2",
+        "verification_method": "Dependency diff review."
+      },
+      {
+        "id": "NFR-005",
+        "type": "non_functional",
+        "statement": "DST resolution is explicit: exact nonexistent input fails; generated shifts/ambiguity policies are transported as warnings and never presented as exact observations.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "assumption",
+        "priority": "p1",
+        "verification_method": "TEST-009."
+      }
+    ],
+    "data_model_and_core_entities": [
+      {
+        "id": "DATA-001",
+        "type": "data",
+        "statement": "RelationshipTimeInput is a discriminated union exact/approximate/unknown.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Type and runtime validation."
+      },
+      {
+        "id": "DATA-002",
+        "type": "data",
+        "statement": "WesternSynastryTransportResponse carries pseudonymous subjects, sample roles, bodies, optional exact-only houses/angles, precision and provenance.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Contract tests."
+      },
+      {
+        "id": "DATA-003",
+        "type": "data",
+        "statement": "RelationshipAspectEvidence carries both person/body roles, aspect, orb range and sample coverage.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Schema and symmetry tests."
+      },
+      {
+        "id": "DATA-004",
+        "type": "data",
+        "statement": "Use dataPrecision, sampledStability, ruleStatus and interpretationStatus; generic confidence is forbidden.",
+        "source_ids": [
+          "SRC-REVIEW-001",
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Forbidden-field test."
+      },
+      {
+        "id": "DATA-005",
+        "type": "data",
+        "statement": "Partner input and analysis response are request-scoped in the MVP.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "DB call review."
+      }
+    ],
+    "api_interface_requirements": [
+      {
+        "id": "API-001",
+        "type": "api",
+        "statement": "Authenticated POST /api/relationships/western-synastry accepts personAProfileId, request-scoped optional time refinement, ephemeral partner input and versioned consent assertion.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Route contract test."
+      },
+      {
+        "id": "API-002",
+        "type": "api",
+        "statement": "Missing or false consent returns 422 before any FuFirE call.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-001."
+      },
+      {
+        "id": "API-003",
+        "type": "api",
+        "statement": "BFF uses existing FuFirE POST /v1/calculate/western only.",
+        "source_ids": [
+          "SRC-REPO-FF-001",
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Client spy and real smoke."
+      },
+      {
+        "id": "API-004",
+        "type": "api",
+        "statement": "Response acknowledges user attestation as not independently verified.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Schema and wording test."
+      },
+      {
+        "id": "API-005",
+        "type": "api",
+        "statement": "No dimension profile or product view-model is returned by the BFF.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Contract test."
+      },
+      {
+        "id": "API-006",
+        "type": "api",
+        "statement": "Missing, malformed or foreign personAProfileId returns 404 and zero FuFirE calls.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-003 and TEST-004."
+      },
+      {
+        "id": "API-007",
+        "type": "api",
+        "statement": "The /api/relationships path participates in the existing compute rate limiter and returns 429 before additional fan-out.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-010."
+      }
+    ],
+    "architecture_constraints": [
+      {
+        "id": "ARCH-001",
+        "type": "architecture",
+        "statement": "FuFirE remains the calculation source and is not modified in the MVP.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Repository diff review."
+      },
+      {
+        "id": "ARCH-002",
+        "type": "architecture",
+        "statement": "BFF owns required auth, owner-filtered profile lookup, validation, consent, rate limiting, sampling, DST policy, redaction and error mapping.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Import/dependency review."
+      },
+      {
+        "id": "ARCH-003",
+        "type": "architecture",
+        "statement": "Frontend owns product analysis and dimension configuration.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Import/dependency review."
+      },
+      {
+        "id": "ARCH-004",
+        "type": "architecture",
+        "statement": "Current compareProfiles score helper is prohibited in the new flow.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Static import and DOM tests."
+      },
+      {
+        "id": "ARCH-005",
+        "type": "architecture",
+        "statement": "API promotion is deferred to API-001 after user and domain evidence.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Backlog artifact exists."
+      }
+    ],
+    "security_privacy_and_compliance": [
+      {
+        "id": "SEC-001",
+        "type": "security",
+        "statement": "Consent is a required attestation and never represented as externally verified.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Route and copy tests."
+      },
+      {
+        "id": "SEC-002",
+        "type": "security",
+        "statement": "Names, dates, times, places, coordinates and upstream payloads are redacted from logs.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Log capture test."
+      },
+      {
+        "id": "SEC-003",
+        "type": "security",
+        "statement": "FuFirE and Supabase secrets remain server-side.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "verified",
+        "priority": "p0",
+        "verification_method": "Bundle/env inspection."
+      },
+      {
+        "id": "SEC-004",
+        "type": "security",
+        "statement": "The relationship route requires auth and resolves personAProfileId with id + user_id; partner persistence is not invoked.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Auth and DB spy tests."
+      },
+      {
+        "id": "SEC-005",
+        "type": "privacy",
+        "statement": "BLOCKER: public launch requires final privacy and consent copy review.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "blocked",
+        "priority": "p0",
+        "verification_method": "Human legal/privacy review."
+      },
+      {
+        "id": "SEC-006",
+        "type": "security",
+        "statement": "The relationship endpoint is included in the existing compute-rate-limit group and rejects over-limit calls before upstream fan-out.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-010."
+      }
+    ],
+    "sustainability_and_greenops": [
+      {
+        "id": "SUS-001",
+        "type": "sustainability",
+        "statement": "Cap sampling at three charts per person, six calls per request, and apply compute rate limiting; avoid duplicate calls within one request.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Call-count and cache-scope tests."
+      },
+      {
+        "id": "SUS-002",
+        "type": "sustainability",
+        "statement": "LLM generation is excluded from MVP to avoid unproven latency, cost and token usage.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p2",
+        "verification_method": "Dependency and network review."
+      }
+    ],
+    "context_engineering_artifacts": [
+      {
+        "id": "CTX-001",
+        "type": "context",
+        "statement": "Decision record is mandatory context for the coding agent.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Artifact existence check."
+      },
+      {
+        "id": "CTX-002",
+        "type": "context",
+        "statement": "Implementation plan and machine-readable PRD are source-of-truth artifacts.",
+        "source_ids": [
+          "SRC-STD-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Validator output."
+      },
+      {
+        "id": "CTX-003",
+        "type": "context",
+        "statement": "API-001 captures deferred FuFirE promotion and prevents scope drift.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Backlog artifact review."
+      }
+    ],
+    "implementation_phases": [
+      {
+        "id": "PHASE-001",
+        "type": "phase",
+        "statement": "Baseline and contracts: characterize old flow, define time/consent/status types.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TASK-001 through TASK-003."
+      },
+      {
+        "id": "PHASE-002",
+        "type": "phase",
+        "statement": "Vertical Slice A: own profile, partner input and consent.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TASK-004 through TASK-006."
+      },
+      {
+        "id": "PHASE-003",
+        "type": "phase",
+        "statement": "Vertical Slice B: BFF real Western sampling and client contract.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TASK-007 through TASK-009."
+      },
+      {
+        "id": "PHASE-004",
+        "type": "phase",
+        "statement": "Vertical Slice C: sampled evidence, simplified result and first real-boundary browser E2E.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TASK-010 through TASK-015."
+      },
+      {
+        "id": "PHASE-005",
+        "type": "phase",
+        "statement": "Human usability gate before depth.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TASK-016."
+      },
+      {
+        "id": "PHASE-006",
+        "type": "phase",
+        "statement": "Conditional full dimensions, explorer, method and print.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "TASK-017 and TASK-018 after gate."
+      }
+    ],
+    "atomic_task_breakdown": [
+      {
+        "id": "TASK-001",
+        "type": "task",
+        "statement": "Freeze current relationship baseline without changing runtime.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-002",
+        "type": "task",
+        "statement": "Define relationship types, time bands and status vocabulary.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-003",
+        "type": "task",
+        "statement": "Add relationship-specific request validation.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-004",
+        "type": "task",
+        "statement": "Build own-profile selection/creation plus transient time refinement for an unknown stored profile.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-005",
+        "type": "task",
+        "statement": "Build partner exact/approximate/unknown input.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-006",
+        "type": "task",
+        "statement": "Build review and consent assertion step.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-007",
+        "type": "task",
+        "statement": "Write authenticated BFF route, owner-filter, consent, call-cap and rate-limit tests first.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-008",
+        "type": "task",
+        "statement": "Implement authenticated relationship BFF route using owned profile lookup and existing FuFirE Western endpoint.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-009",
+        "type": "task",
+        "statement": "Add client transport validation.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-010",
+        "type": "task",
+        "statement": "Implement sampled aspect stability with all-pairs stable and center-plus-majority provisional threshold.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-011",
+        "type": "task",
+        "statement": "Implement simplified no-score product analyzer.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-012",
+        "type": "task",
+        "statement": "Build end-to-end MVP shell.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-013",
+        "type": "task",
+        "statement": "Apply accessible pastel-Olive design tokens.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-014",
+        "type": "task",
+        "statement": "Add the first real-boundary browser E2E with actual auth/profile/BFF/FuFirE boundaries and no route interception.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-015",
+        "type": "task",
+        "statement": "Run the MVP evidence/release gate and record exact static, browser and real-boundary results.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-016",
+        "type": "task",
+        "statement": "Run and document usability Human Gate.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-017",
+        "type": "task",
+        "statement": "Expand to accepted six dimensions after gate.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "See implementation plan task contract."
+      },
+      {
+        "id": "TASK-018",
+        "type": "task",
+        "statement": "Add accepted explorer, method, print and rollout hardening while retaining real-boundary regression.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "See implementation plan task contract."
+      }
+    ],
+    "acceptance_criteria": [
+      {
+        "id": "AC-001",
+        "type": "acceptance",
+        "statement": "Missing/false consent returns 422 and produces zero upstream calls.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-001."
+      },
+      {
+        "id": "AC-002",
+        "type": "acceptance",
+        "statement": "Owned-profile boundary resolves personAProfileId using id + user_id; foreign/missing IDs return 404 and zero upstream calls.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-002."
+      },
+      {
+        "id": "AC-003",
+        "type": "acceptance",
+        "statement": "Exact mode produces one sample per exact person and may expose exact houses/angles.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-002 and UI review."
+      },
+      {
+        "id": "AC-004",
+        "type": "acceptance",
+        "statement": "Approximate/unknown use bounded samples; provisional requires center pair plus at least ceil(totalPairs/2), and houses/angles remain unavailable unless both are exact.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-002 and TEST-005."
+      },
+      {
+        "id": "AC-005",
+        "type": "acceptance",
+        "statement": "Real-boundary flow reaches actual authenticated profile persistence and actual FuFirE with no route interception or canned upstream response.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-006."
+      },
+      {
+        "id": "AC-006",
+        "type": "acceptance",
+        "statement": "New flow contains no score or relationship verdict.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-007."
+      },
+      {
+        "id": "AC-007",
+        "type": "acceptance",
+        "statement": "Every displayed pattern carries body roles, aspect/orb range, sample coverage and explicit statuses.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-005."
+      },
+      {
+        "id": "AC-008",
+        "type": "acceptance",
+        "statement": "Depth work begins only after the real MVP evidence gate and a recorded usability decision.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Human gate artifact."
+      },
+      {
+        "id": "AC-009",
+        "type": "acceptance",
+        "statement": "Exact nonexistent local time is rejected; generated DST adjustments or ambiguity policies are surfaced in transport warnings.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "assumption",
+        "priority": "p1",
+        "verification_method": "TEST-009."
+      },
+      {
+        "id": "AC-010",
+        "type": "acceptance",
+        "statement": "Compute rate-limit returns 429 and prevents further FuFirE fan-out.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-010."
+      },
+      {
+        "id": "AC-012",
+        "type": "acceptance",
+        "statement": "Partner input and analysis result are not automatically persisted; storage calls are absent from the relationship flow.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-011."
+      },
+      {
+        "id": "AC-013",
+        "type": "acceptance",
+        "statement": "Public launch remains blocked until astrology wording, privacy wording and consent copy receive recorded human approval.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REVIEW-001"
+        ],
+        "status": "blocked",
+        "priority": "p0",
+        "verification_method": "TEST-013."
+      }
+    ],
+    "test_strategy": [
+      {
+        "id": "TEST-001",
+        "type": "test",
+        "statement": "Unit/route test consent 422 and zero upstream calls.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "npm test -- src/server/app.relationship.test.ts"
+      },
+      {
+        "id": "TEST-002",
+        "type": "test",
+        "statement": "Time-band and relationship validator matrix.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "npm test -- src/utils/relationship"
+      },
+      {
+        "id": "TEST-003",
+        "type": "test",
+        "statement": "Authenticated own-profile select/create, transient unknown-time refinement and owner-filter regression.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "npm test -- ProfileStep and app.profiles tests."
+      },
+      {
+        "id": "TEST-004",
+        "type": "test",
+        "statement": "BFF auth, owner lookup, consent short-circuit, call count and transport contract with process-local upstream double.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "app.relationship.test.ts"
+      },
+      {
+        "id": "TEST-005",
+        "type": "test",
+        "statement": "Aspect symmetry, role preservation, center-plus-majority sampled stability and no generic confidence.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "sampleStability tests."
+      },
+      {
+        "id": "TEST-006",
+        "type": "test",
+        "statement": "Gated Playwright real-boundary smoke with actual auth/profile persistence and actual FuFirE, no route interception.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "RELATIONSHIP_REAL_BOUNDARY=1 npm run e2e -- tests/e2e/relationship-real-boundary.spec.ts"
+      },
+      {
+        "id": "TEST-007",
+        "type": "test",
+        "statement": "Static/DOM check excludes compareProfiles and all compatibility percentages.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "wording/import tests."
+      },
+      {
+        "id": "TEST-008",
+        "type": "test",
+        "statement": "Responsive, keyboard, contrast and reduced-motion checks.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Playwright and contrast tests."
+      },
+      {
+        "id": "TEST-009",
+        "type": "test",
+        "statement": "DST boundary tests for exact rejection, generated shift warning and ambiguous-time policy.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "assumption",
+        "priority": "p1",
+        "verification_method": "Focused unit/route tests."
+      },
+      {
+        "id": "TEST-010",
+        "type": "test",
+        "statement": "Dedicated relationship compute-rate-limit test proves 429 and zero additional upstream fan-out.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Route test."
+      },
+      {
+        "id": "TEST-011",
+        "type": "test",
+        "statement": "Storage spy and repository review prove the relationship flow does not write partner input or analysis result.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Focused route/client test."
+      },
+      {
+        "id": "TEST-012",
+        "type": "test",
+        "statement": "Bundle/env/log review proves FuFirE and Supabase secrets and raw birth payloads are not exposed.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Build inspection and log-capture test."
+      },
+      {
+        "id": "TEST-013",
+        "type": "test",
+        "statement": "Human review checklist records astrology, privacy and consent-copy approval before public launch.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REVIEW-001"
+        ],
+        "status": "blocked",
+        "priority": "p0",
+        "verification_method": "Signed review artifact."
+      }
+    ],
+    "observability_and_monitoring": [
+      {
+        "id": "OBS-001",
+        "type": "observability",
+        "statement": "Log request ID, duration, sample count, status and upstream code without PII.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Log capture test."
+      },
+      {
+        "id": "OBS-002",
+        "type": "observability",
+        "statement": "Record real-boundary request ID and evidence class in the completion report.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Run ledger review."
+      },
+      {
+        "id": "OBS-003",
+        "type": "observability",
+        "statement": "No fake progress percentage; UI shows named processing stages only.",
+        "source_ids": [
+          "SRC-USER-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Component test."
+      }
+    ],
+    "risk_register": [
+      {
+        "id": "RISK-001",
+        "type": "risk",
+        "statement": "Consent copy may be mistaken for verified consent. Mitigation: explicit attestation wording and 422 gate.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Copy and route tests."
+      },
+      {
+        "id": "RISK-002",
+        "type": "risk",
+        "statement": "Discrete samples may miss behavior between sample points. Mitigation: center-plus-majority threshold, visible sampled approximation, capped claims and later interval-engine review.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Method copy and domain review."
+      },
+      {
+        "id": "RISK-003",
+        "type": "risk",
+        "statement": "Frontend-owned rules can diverge across future clients. Mitigation: version rules and API-001 promotion gate.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Version and backlog review."
+      },
+      {
+        "id": "RISK-004",
+        "type": "risk",
+        "statement": "Real-boundary staging may be unavailable. Mitigation: do not claim acceptance; keep flag disabled.",
+        "source_ids": [
+          "SRC-REPO-NB-001",
+          "SRC-REPO-FF-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Smoke evidence."
+      },
+      {
+        "id": "RISK-005",
+        "type": "risk",
+        "statement": "Pastel visual polish may hide comprehension problems. Mitigation: usability gate before depth.",
+        "source_ids": [
+          "SRC-REVIEW-001"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Human research artifact."
+      },
+      {
+        "id": "RISK-006",
+        "type": "risk",
+        "statement": "Profile ID without server-side owner filtering could expose or process another user’s birth data. Mitigation: required auth, id + user_id lookup, 404 and zero-upstream authz test.",
+        "source_ids": [
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-003 and TEST-004."
+      },
+      {
+        "id": "RISK-007",
+        "type": "risk",
+        "statement": "Generated samples on DST transitions can shift or duplicate local time. Mitigation: explicit policies, warnings and boundary tests.",
+        "source_ids": [
+          "SRC-REPO-FF-001"
+        ],
+        "status": "assumption",
+        "priority": "p1",
+        "verification_method": "TEST-009."
+      }
+    ],
+    "rollback_and_checkpoints": [
+      {
+        "id": "ROLLBACK-001",
+        "type": "rollback",
+        "statement": "Feature stays behind RELATIONSHIP_MVP_ENABLED; disable to revert user exposure.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Flag test."
+      },
+      {
+        "id": "ROLLBACK-002",
+        "type": "rollback",
+        "statement": "Old Synastry tab and route remain until user acceptance.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Navigation and route review."
+      },
+      {
+        "id": "ROLLBACK-003",
+        "type": "checkpoint",
+        "statement": "Stop after real-boundary MVP and request Human Gate before TASK-017.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Decision log."
+      },
+      {
+        "id": "ROLLBACK-004",
+        "type": "rollback",
+        "statement": "No DB migration or FuFirE change is required, reducing rollback surface.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p1",
+        "verification_method": "Repository diff."
+      }
+    ],
+    "definition_of_done": [
+      {
+        "id": "DOD-001",
+        "type": "done",
+        "statement": "TASK-001 through TASK-015 implemented with recorded focused, typecheck, build and real-boundary results; no result is presumed green in advance.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Command output."
+      },
+      {
+        "id": "DOD-002",
+        "type": "done",
+        "statement": "Real-boundary smoke passes and records request ID without PII.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "TEST-006 evidence."
+      },
+      {
+        "id": "DOD-003",
+        "type": "done",
+        "statement": "No score, demo result, placeholder, route interception or canned upstream response supports the completion claim.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "DOM/network review."
+      },
+      {
+        "id": "DOD-004",
+        "type": "done",
+        "statement": "Usability Human Gate is documented before depth expansion.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "User-confirmed decision."
+      }
+    ],
+    "agent_handoff_instructions": [
+      {
+        "id": "CTX-004",
+        "type": "handoff",
+        "statement": "Read decision record, PRD and plan before editing code.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Handoff acknowledgment."
+      },
+      {
+        "id": "CTX-005",
+        "type": "handoff",
+        "statement": "Implement tasks in order and stop after the TASK-015 evidence gate for review.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Completion report."
+      },
+      {
+        "id": "CTX-006",
+        "type": "handoff",
+        "statement": "Stop if DB migration, FuFirE modification, partner persistence, consent meaning change, owner-filter bypass, rate-limit bypass or more than three samples per person becomes necessary.",
+        "source_ids": [
+          "SRC-USER-002"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Agent stop report."
+      },
+      {
+        "id": "CTX-007",
+        "type": "handoff",
+        "statement": "Report exact commands, outputs, evidence class and residual limitations.",
+        "source_ids": [
+          "SRC-STD-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Completion template."
+      }
+    ]
+  },
+  "traceability_matrix": [
+    {
+      "requirement_id": "FR-003",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-001"
+      ],
+      "test_ids": [
+        "TEST-001"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-006",
+        "TASK-007",
+        "TASK-008"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ]
+    },
+    {
+      "requirement_id": "FR-004",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-002",
+        "AC-003",
+        "AC-004"
+      ],
+      "test_ids": [
+        "TEST-002"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-005"
+      ],
+      "risk_ids": [
+        "RISK-002"
+      ]
+    },
+    {
+      "requirement_id": "FR-005",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REPO-FF-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-003",
+        "AC-004",
+        "AC-005",
+        "AC-009"
+      ],
+      "test_ids": [
+        "TEST-002",
+        "TEST-004",
+        "TEST-005",
+        "TEST-006",
+        "TEST-009"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-007",
+        "TASK-008",
+        "TASK-010",
+        "TASK-014"
+      ],
+      "risk_ids": [
+        "RISK-002",
+        "RISK-004"
+      ]
+    },
+    {
+      "requirement_id": "FR-006",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-007"
+      ],
+      "test_ids": [
+        "TEST-005"
+      ],
+      "task_ids": [
+        "TASK-010",
+        "TASK-011"
+      ],
+      "risk_ids": [
+        "RISK-002",
+        "RISK-003"
+      ]
+    },
+    {
+      "requirement_id": "FR-007",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-006"
+      ],
+      "test_ids": [
+        "TEST-007"
+      ],
+      "task_ids": [
+        "TASK-001",
+        "TASK-011",
+        "TASK-012"
+      ],
+      "risk_ids": []
+    },
+    {
+      "requirement_id": "API-002",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-001"
+      ],
+      "test_ids": [
+        "TEST-001"
+      ],
+      "task_ids": [
+        "TASK-007",
+        "TASK-008"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ]
+    },
+    {
+      "requirement_id": "ARCH-003",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-007"
+      ],
+      "test_ids": [
+        "TEST-005"
+      ],
+      "task_ids": [
+        "TASK-010",
+        "TASK-011",
+        "TASK-017"
+      ],
+      "risk_ids": [
+        "RISK-003"
+      ]
+    },
+    {
+      "requirement_id": "SEC-002",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-004",
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-008",
+        "TASK-015"
+      ],
+      "risk_ids": [
+        "RISK-004"
+      ]
+    },
+    {
+      "requirement_id": "NFR-001",
+      "source_ids": [
+        "SRC-USER-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-008"
+      ],
+      "test_ids": [
+        "TEST-008"
+      ],
+      "task_ids": [
+        "TASK-013",
+        "TASK-014",
+        "TASK-015"
+      ],
+      "risk_ids": [
+        "RISK-005"
+      ]
+    },
+    {
+      "requirement_id": "FR-009",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-008"
+      ],
+      "test_ids": [],
+      "task_ids": [
+        "TASK-016",
+        "TASK-017"
+      ],
+      "risk_ids": [
+        "RISK-005"
+      ]
+    },
+    {
+      "requirement_id": "FR-001",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-002",
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-003",
+        "TEST-004",
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-007",
+        "TASK-008",
+        "TASK-014"
+      ],
+      "risk_ids": [
+        "RISK-006"
+      ]
+    },
+    {
+      "requirement_id": "SEC-004",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-002",
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-003",
+        "TEST-004",
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-007",
+        "TASK-008",
+        "TASK-014"
+      ],
+      "risk_ids": [
+        "RISK-006"
+      ]
+    },
+    {
+      "requirement_id": "SEC-006",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-010"
+      ],
+      "test_ids": [
+        "TEST-010"
+      ],
+      "task_ids": [
+        "TASK-007",
+        "TASK-008",
+        "TASK-015"
+      ],
+      "risk_ids": []
+    },
+    {
+      "requirement_id": "FR-002",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-012"
+      ],
+      "test_ids": [
+        "TEST-011"
+      ],
+      "task_ids": [
+        "TASK-005",
+        "TASK-008",
+        "TASK-012",
+        "TASK-015"
+      ],
+      "risk_ids": []
+    },
+    {
+      "requirement_id": "FR-010",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-014",
+        "TASK-015"
+      ],
+      "risk_ids": [
+        "RISK-004"
+      ]
+    },
+    {
+      "requirement_id": "API-001",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-001",
+        "AC-002",
+        "AC-003",
+        "AC-004",
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-001",
+        "TEST-002",
+        "TEST-003",
+        "TEST-004",
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-007",
+        "TASK-008",
+        "TASK-014"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-002",
+        "RISK-006"
+      ]
+    },
+    {
+      "requirement_id": "API-003",
+      "source_ids": [
+        "SRC-REPO-FF-001",
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-004",
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-008",
+        "TASK-014"
+      ],
+      "risk_ids": [
+        "RISK-004"
+      ]
+    },
+    {
+      "requirement_id": "API-004",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-001"
+      ],
+      "test_ids": [
+        "TEST-001"
+      ],
+      "task_ids": [
+        "TASK-006",
+        "TASK-007",
+        "TASK-008"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ]
+    },
+    {
+      "requirement_id": "API-005",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-009"
+      ],
+      "test_ids": [
+        "TEST-004",
+        "TEST-005"
+      ],
+      "task_ids": [
+        "TASK-008",
+        "TASK-009",
+        "TASK-010",
+        "TASK-011"
+      ],
+      "risk_ids": [
+        "RISK-003"
+      ]
+    },
+    {
+      "requirement_id": "API-006",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-002"
+      ],
+      "test_ids": [
+        "TEST-003",
+        "TEST-004"
+      ],
+      "task_ids": [
+        "TASK-007",
+        "TASK-008"
+      ],
+      "risk_ids": [
+        "RISK-006"
+      ]
+    },
+    {
+      "requirement_id": "API-007",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-010"
+      ],
+      "test_ids": [
+        "TEST-010"
+      ],
+      "task_ids": [
+        "TASK-007",
+        "TASK-008",
+        "TASK-015"
+      ],
+      "risk_ids": []
+    },
+    {
+      "requirement_id": "ARCH-001",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REPO-FF-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-004",
+        "TEST-006"
+      ],
+      "task_ids": [
+        "TASK-008",
+        "TASK-014"
+      ],
+      "risk_ids": [
+        "RISK-003"
+      ]
+    },
+    {
+      "requirement_id": "ARCH-002",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-001",
+        "AC-002",
+        "AC-006",
+        "AC-010"
+      ],
+      "test_ids": [
+        "TEST-001",
+        "TEST-003",
+        "TEST-004",
+        "TEST-009",
+        "TEST-010"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-007",
+        "TASK-008"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-002",
+        "RISK-006",
+        "RISK-007"
+      ]
+    },
+    {
+      "requirement_id": "ARCH-004",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-008"
+      ],
+      "test_ids": [
+        "TEST-007"
+      ],
+      "task_ids": [
+        "TASK-001",
+        "TASK-011",
+        "TASK-012"
+      ],
+      "risk_ids": []
+    },
+    {
+      "requirement_id": "SEC-001",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-001"
+      ],
+      "test_ids": [
+        "TEST-001"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-006",
+        "TASK-007",
+        "TASK-008"
+      ],
+      "risk_ids": [
+        "RISK-001"
+      ]
+    },
+    {
+      "requirement_id": "SEC-003",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-005"
+      ],
+      "test_ids": [
+        "TEST-012"
+      ],
+      "task_ids": [
+        "TASK-008",
+        "TASK-013",
+        "TASK-015"
+      ],
+      "risk_ids": []
+    },
+    {
+      "requirement_id": "SEC-005",
+      "source_ids": [
+        "SRC-USER-002",
+        "SRC-REVIEW-001"
+      ],
+      "acceptance_criteria_ids": [
+        "AC-013"
+      ],
+      "test_ids": [
+        "TEST-013"
+      ],
+      "task_ids": [
+        "TASK-016"
+      ],
+      "risk_ids": [
+        "RISK-001",
+        "RISK-005"
+      ]
+    }
+  ],
+  "evidence_ledger": [
+    {
+      "evidence_id": "EVD-001",
+      "claim_id": "INFO-002",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "evidence_class": "repository_evidence",
+      "quote_or_pointer": "src/utils/synastry.ts lines 47-69 and src/server/app.ts lines 674-708",
+      "confidence": 5,
+      "limitations": [
+        "Static inspection; runtime not executed in this artifact build."
+      ]
+    },
+    {
+      "evidence_id": "EVD-002",
+      "claim_id": "INFO-003",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "evidence_class": "repository_evidence",
+      "quote_or_pointer": "src/utils/birthInputValidation.ts lines 93-103",
+      "confidence": 5,
+      "limitations": [
+        "Shows current placeholder behavior, not desired behavior."
+      ]
+    },
+    {
+      "evidence_id": "EVD-003",
+      "claim_id": "FR-001",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "evidence_class": "repository_evidence",
+      "quote_or_pointer": "src/server/app.ts lines 820-865 and nb_profiles migration with RLS",
+      "confidence": 5,
+      "limitations": [
+        "Live Supabase boundary not tested here."
+      ]
+    },
+    {
+      "evidence_id": "EVD-004",
+      "claim_id": "API-003",
+      "source_ids": [
+        "SRC-REPO-FF-001",
+        "SRC-REPO-NB-001"
+      ],
+      "evidence_class": "repository_evidence",
+      "quote_or_pointer": "FuFirE routers/western.py and New_Bazi fufireClient.ts postWestern",
+      "confidence": 5,
+      "limitations": [
+        "No live call executed during document generation."
+      ]
+    },
+    {
+      "evidence_id": "EVD-005",
+      "claim_id": "FR-003",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "evidence_class": "direct_source",
+      "quote_or_pointer": "User explicitly chose mandatory checkbox attestation as the maximum verifiable consent control.",
+      "confidence": 5,
+      "limitations": [
+        "Attestation does not prove actual consent."
+      ]
+    },
+    {
+      "evidence_id": "EVD-006",
+      "claim_id": "FR-004",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "evidence_class": "direct_source",
+      "quote_or_pointer": "User chose rough day-part input and uncertainty range rather than omitting all Moon-related material.",
+      "confidence": 5,
+      "limitations": [
+        "Exact time-band boundaries are a reversible assumption."
+      ]
+    },
+    {
+      "evidence_id": "EVD-007",
+      "claim_id": "ARCH-003",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "evidence_class": "direct_source",
+      "quote_or_pointer": "User chose frontend ownership for dimensions and normalization with a later API ticket.",
+      "confidence": 5,
+      "limitations": [
+        "Future multi-client consistency remains a risk."
+      ]
+    },
+    {
+      "evidence_id": "EVD-008",
+      "claim_id": "DOD-002",
+      "source_ids": [
+        "SRC-USER-002"
+      ],
+      "evidence_class": "missing",
+      "quote_or_pointer": "MISSING: real staging smoke has not yet run.",
+      "confidence": 1,
+      "limitations": [
+        "Blocks real-function completion claim."
+      ]
+    },
+    {
+      "evidence_id": "EVD-009",
+      "claim_id": "SEC-004",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "evidence_class": "repository_evidence",
+      "quote_or_pointer": "src/server/app.ts /api/me/profiles uses requireUserAuth and user_id owner filters.",
+      "confidence": 5,
+      "limitations": [
+        "New relationship route is not yet implemented."
+      ]
+    },
+    {
+      "evidence_id": "EVD-010",
+      "claim_id": "SEC-006",
+      "source_ids": [
+        "SRC-REPO-NB-001"
+      ],
+      "evidence_class": "repository_evidence",
+      "quote_or_pointer": "src/server/app.ts has global and compute rate limiters; relationship path must be added to compute group.",
+      "confidence": 5,
+      "limitations": [
+        "Coverage for the new path is a planned change."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "domain": "product_logic",
+      "severity": "high",
+      "claim": "Current compareProfiles percentage is too coarse for the new Western-only product and must not be reused.",
+      "evidence_ids": [
+        "EVD-001"
+      ],
+      "standard_mapping": [
+        "ARCH-004"
+      ],
+      "impact": "Would present a misleading verdict and mix BaZi with Western scope.",
+      "recommendation": "Prohibit import and add no-score DOM/static tests.",
+      "verification_status": "source_inspected"
+    },
+    {
+      "finding_id": "F-002",
+      "domain": "data_precision",
+      "severity": "high",
+      "claim": "Current unknown-time path substitutes 12:00 and therefore needs a relationship-specific uncertainty model.",
+      "evidence_ids": [
+        "EVD-002",
+        "EVD-006"
+      ],
+      "standard_mapping": [
+        "DATA-001",
+        "RISK-002"
+      ],
+      "impact": "Could make uncertain Moon/angle outputs appear exact.",
+      "recommendation": "Use exact/approximate/unknown union and sampled stability.",
+      "verification_status": "source_inspected"
+    },
+    {
+      "finding_id": "F-003",
+      "domain": "privacy",
+      "severity": "critical",
+      "claim": "Current synastry route has no required second-person consent assertion.",
+      "evidence_ids": [
+        "EVD-001",
+        "EVD-005"
+      ],
+      "standard_mapping": [
+        "SEC-001",
+        "API-002"
+      ],
+      "impact": "A caller can start pair analysis without even attesting permission.",
+      "recommendation": "Add BFF 422 gate and explicit non-verification wording.",
+      "verification_status": "source_inspected_and_user_decided"
+    },
+    {
+      "finding_id": "F-004",
+      "domain": "architecture",
+      "severity": "medium",
+      "claim": "Product dimensions are not yet evidence-backed as a reusable API standard.",
+      "evidence_ids": [
+        "EVD-007"
+      ],
+      "standard_mapping": [
+        "ARCH-003",
+        "ARCH-005"
+      ],
+      "impact": "Premature API standardization would increase migration cost.",
+      "recommendation": "Keep versioned frontend config and defer API promotion to API-001.",
+      "verification_status": "user_decided"
+    },
+    {
+      "finding_id": "F-005",
+      "domain": "runtime",
+      "severity": "high",
+      "claim": "Real-boundary behavior remains unverified until staging smoke executes.",
+      "evidence_ids": [
+        "EVD-008"
+      ],
+      "standard_mapping": [
+        "TEST-006",
+        "DOD-002"
+      ],
+      "impact": "Static, unit or process-local integration tests cannot support a real-function claim.",
+      "recommendation": "Run the first browser E2E against actual profile and FuFirE boundaries and record request ID.",
+      "verification_status": "unverified"
+    },
+    {
+      "finding_id": "F-006",
+      "domain": "authorization",
+      "severity": "high",
+      "claim": "The new analysis should not trust raw Person-A data when the MVP promise is an owned stored profile boundary.",
+      "evidence_ids": [
+        "EVD-003",
+        "EVD-009"
+      ],
+      "standard_mapping": [
+        "SEC-004",
+        "API-006"
+      ],
+      "impact": "A caller could bypass profile ownership and the real-boundary test would validate the wrong trust model.",
+      "recommendation": "Accept personAProfileId, resolve with id + user_id, return 404 and make zero upstream calls on mismatch.",
+      "verification_status": "source_inspected_and_planned"
+    },
+    {
+      "finding_id": "F-007",
+      "domain": "reliability_security",
+      "severity": "medium",
+      "claim": "The existing compute limiter does not automatically cover a new /api/relationships path unless explicitly added.",
+      "evidence_ids": [
+        "EVD-010"
+      ],
+      "standard_mapping": [
+        "SEC-006",
+        "API-007"
+      ],
+      "impact": "One request can fan out to six paid upstream calls, increasing abuse and cost exposure.",
+      "recommendation": "Add the path to the compute limiter and test 429 before fan-out.",
+      "verification_status": "source_inspected_and_planned"
+    }
+  ],
+  "security_controls": {
+    "risk_level": "high",
+    "authentication": [
+      {
+        "id": "SEC-101",
+        "type": "security_control",
+        "statement": "Use existing Supabase authentication for persisted own-profile access; anonymous MVP profile persistence is not introduced.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "authorization": [
+      {
+        "id": "SEC-102",
+        "type": "security_control",
+        "statement": "Require auth and resolve personAProfileId with id + user_id; return 404 and zero FuFirE calls for missing/foreign IDs. Partner data are not persisted.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "secrets_management": [
+      {
+        "id": "SEC-103",
+        "type": "security_control",
+        "statement": "FuFirE and Supabase service credentials remain server-side and are never serialized to the browser.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "logging_and_redaction": [
+      {
+        "id": "SEC-104",
+        "type": "security_control",
+        "statement": "Log request ID, status and sample count only; redact names, birth data, location and payloads.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "data_protection": [
+      {
+        "id": "SEC-105",
+        "type": "security_control",
+        "statement": "Partner data and results are request-scoped; no automatic persistence or analytics payload contains birth data.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "abuse_cases": [
+      {
+        "id": "SEC-106",
+        "type": "security_control",
+        "statement": "Reject absent/false consent, invalid profile IDs, oversized inputs, excessive sample fan-out and compute-rate-limit violations before upstream calls.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "destructive_action_controls": [
+      {
+        "id": "SEC-107",
+        "type": "security_control",
+        "statement": "No migration, deletion or partner persistence action is in current scope; feature rollback uses a flag.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "security_tests": [
+      {
+        "id": "SEC-108",
+        "type": "security_control",
+        "statement": "Add consent short-circuit, owner-filter, log-redaction, compute-rate-limit and secret/bundle tests plus a separate real-boundary smoke.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "accepted",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "privacy_controls": [
+      {
+        "id": "SEC-109",
+        "type": "security_control",
+        "statement": "UI states that attestation is user-provided and not independently verified; final public wording needs human review.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "needs_review",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ],
+    "human_review_checkpoints": [
+      {
+        "id": "SEC-110",
+        "type": "security_control",
+        "statement": "Privacy/text review before public launch and human usability gate before depth expansion.",
+        "source_ids": [
+          "SRC-USER-002",
+          "SRC-REPO-NB-001"
+        ],
+        "status": "needs_review",
+        "priority": "p0",
+        "verification_method": "Review/test"
+      }
+    ]
+  },
+  "agent_handoff": {
+    "objective": "Implement TASK-001 through TASK-015 and stop after the real-boundary evidence gate before depth expansion.",
+    "allowed_files": [
+      "New relationship modules and tests listed in the plan",
+      "Bounded additive edits to src/server/app.ts, src/api/bazodiacClient.ts, src/App.tsx, PageShell and scoped CSS"
+    ],
+    "prohibited_files": [
+      "FuFirE repository files",
+      "Supabase migrations",
+      "Existing score helper except tests documenting non-use"
+    ],
+    "prohibited_actions": [
+      "Modify FuFirE in current MVP",
+      "Persist partner data automatically",
+      "Add compatibility score or deterministic verdict",
+      "Call FuFirE from browser",
+      "Bypass consent, owner filter or compute rate limit",
+      "Use route interception, demo profile or canned upstream response as real-boundary evidence",
+      "Commit secrets or PII",
+      "Force push or bypass checks"
+    ],
+    "validation_commands": [
+      "npm test -- src/utils/relationship",
+      "npm test -- src/server/app.relationship.test.ts src/server/app.ratelimit.test.ts",
+      "npm test -- src/components/relationship",
+      "npm run lint",
+      "npm run build",
+      "RELATIONSHIP_REAL_BOUNDARY=1 npm run e2e -- tests/e2e/relationship-real-boundary.spec.ts"
+    ],
+    "stop_conditions": [
+      "A DB migration is required",
+      "A new FuFirE endpoint is required",
+      "Consent wording changes meaning",
+      "Owner-filter or rate-limit behavior cannot be preserved",
+      "More than three samples per person are required",
+      "Staging credentials are unavailable for TASK-014",
+      "Depth work begins before Human Gate"
+    ],
+    "human_review_checkpoints": [
+      "After real-boundary smoke",
+      "After usability sessions",
+      "Before public launch",
+      "Human public-launch review: TEST-013"
+    ]
+  },
+  "quality_gate_report": {
+    "gates": [
+      {
+        "gate": "Precision Gate",
+        "status": "PASS",
+        "reason": "Core behavior is defined with binary acceptance criteria and explicit uncertainty statuses."
+      },
+      {
+        "gate": "Missing Information Gate",
+        "status": "PASS",
+        "reason": "Remaining unknowns are labeled and do not block MVP coding."
+      },
+      {
+        "gate": "Evidence Gate",
+        "status": "PASS",
+        "reason": "Repository facts and user decisions have source IDs; runtime remains explicitly unverified."
+      },
+      {
+        "gate": "Architecture Gate",
+        "status": "PASS",
+        "reason": "FuFirE, BFF and frontend ownership are explicit; API promotion is deferred."
+      },
+      {
+        "gate": "Data Gate",
+        "status": "PASS",
+        "reason": "Time modes, evidence roles, lifecycle and non-persistence are explicit."
+      },
+      {
+        "gate": "Security Gate",
+        "status": "PASS",
+        "reason": "Consent attestation, auth boundary, redaction and stop rules are specified; public launch remains human-gated."
+      },
+      {
+        "gate": "Agent Executability Gate",
+        "status": "PASS",
+        "reason": "Tasks, allowed files, commands, rollback and stop conditions are defined."
+      },
+      {
+        "gate": "Testability Gate",
+        "status": "PASS",
+        "reason": "Requirements map to tests and real-boundary evidence."
+      },
+      {
+        "gate": "Artifact Gate",
+        "status": "PASS",
+        "reason": "Markdown, JSON and SARIF artifacts are emitted and validated."
+      }
+    ],
+    "overall_status": "PASS"
+  },
+  "open_questions": [
+    {
+      "question_id": "OQ-001",
+      "question": "What is the final product name and URL slug?",
+      "blocks_release": false
+    },
+    {
+      "question_id": "OQ-002",
+      "question": "Which dimensions and labels survive the usability gate?",
+      "blocks_release": false
+    },
+    {
+      "question_id": "OQ-003",
+      "question": "Are staging credentials available for the required real-boundary smoke?",
+      "blocks_release": true
+    },
+    {
+      "question_id": "OQ-004",
+      "question": "Has final astrology, privacy and consent copy been approved for public launch?",
+      "blocks_release": true
+    }
+  ],
+  "final_decision": "release"
+}
