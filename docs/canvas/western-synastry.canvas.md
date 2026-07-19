@@ -210,10 +210,16 @@ Status: **CONFIRMED**
   `tests/e2e/relationship-real-boundary.spec.ts` — alle abwesend. TASK-001…015 unbegonnen.
 - Toolchain: node v24.16.0, npm 11.13.0, `npm ci` erfolgreich. `lint` = `tsc --noEmit`,
   `test` = `vitest run`, `e2e` = `playwright test`.
+- **Baseline gemessen (2026-07-20, HEAD `95c85c0`), nicht angenommen:** `npm run lint`
+  → exit 0. `npm test` → **57 Test-Files, 783 Tests passed**, Dauer 8,54 s. Die im Log
+  sichtbaren `DOMException: Failed to load script "https://elevenlabs.io/convai-widget/index.js"`
+  stammen aus `src/components/AgentWidget.tsx:64` unter happy-dom (externes Script wird im
+  Testlauf nicht geladen) — Rauschen, kein Testfehler. Die Prämisse des Plans, auf einem
+  grünen Bestand aufzusetzen, ist damit **belegt**.
 
 **Noch zu erbringen, bevor Implementierung als real gilt:**
-- Baseline: `npm test`, `npm run lint`, `npm run build` auf HEAD — **ungeprüft**, wird als
-  erster Schritt von TASK-001 gemessen, nicht angenommen.
+- `npm run build` auf HEAD — bisher nicht ausgeführt (**ungeprüft**), wird in TASK-001
+  gemessen.
 - Pro Task: fokussierte Tests test-first (rot vor grün), Evidenzklasse pro REQ.
 - `real-boundary-smoke` (TASK-014/015) — **blockiert durch R4**.
 - `user-confirmed` (TASK-016) — nach dem Usability-Gate.
