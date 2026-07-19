@@ -1,10 +1,10 @@
-<!-- Status: draft -->
-<!-- Confirmed by user: no -->
+<!-- Status: user-confirmed -->
+<!-- Confirmed by user: yes (2026-07-20) -->
 
 # Product Canvas — Western Synastry MVP (astro-synestrie)
 
 **Feature slug:** `western-synastry`
-**Status:** draft · **Confirmed by user:** no
+**Status:** user-confirmed · **Confirmed by user:** yes (2026-07-20)
 **Autor des Entwurfs:** Orchestrator (`/agileteam`), abgeleitet aus PRD + Entscheidungsprotokoll + Repo-Inspektion
 **Repo:** `DYAI2025/astro-synestrie` (Fork von `DYAI2025/New_Bazi`, upstream-Remote erhalten)
 
@@ -301,9 +301,14 @@ sichtbar machen soll. Der Stop bei TASK-008 ist deshalb der wichtigste des Laufs
 
 ## User confirmation
 
-**Confirmed by user:** no — **ausstehend**
-**Confirmation date:** —
-**Confirmation note:** —
+**Confirmed by user:** yes
+**Confirmation date:** 2026-07-20
+**Confirmed by:** Benjamin Poersch (Product Owner)
+**Confirmation note:** Ausdrückliche Bestätigung dieses Canvas als Wertbasis für den
+`/agileteam`-Lauf, einschließlich der drei unten benannten Grenzen (R4 / D5 / keine
+öffentliche Freigabe). Bestätigt wurde ebenfalls: Phase 0.16 Council **und** ein
+unabhängiger Blindstellen-Spec-Audit laufen, statt sich auf die nicht-unabhängigen
+Reviews vom 2026-07-19 zu stützen.
 
 Alle Felder sind beantwortet; kein Feld steht mehr auf `MISSING` oder `OPEN QUESTION`.
 Vorentscheidungen des Nutzers vom 2026-07-20, die in diesen Canvas eingeflossen sind:
