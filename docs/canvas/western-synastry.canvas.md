@@ -142,7 +142,8 @@ Status: **CONFIRMED**
 
 ## 8. Risks / contradictions
 
-Status: **OPEN QUESTION** — R5 und R4 brauchen eine Nutzerentscheidung.
+Status: **CONFIRMED** — R5 durch Nutzerentscheidung aufgelöst (2026-07-20); R4 bleibt als
+bewusst akzeptierte Lauf-Grenze bestehen, nicht als offene Frage.
 
 - **R1 — Consent wird als geprüfte Zustimmung gelesen** (PRD `RISK-001`, *belegt als Risiko,
   Wirksamkeit ungeprüft*). Mitigation: explizite Attestierungs-Formulierung, 422-Gate,
@@ -166,15 +167,20 @@ Status: **OPEN QUESTION** — R5 und R4 brauchen eine Nutzerentscheidung.
   steht heute in `src/components/Synastry.tsx:242`. Der neue PRD verbietet jeden Score
   (`FR-007`, `AC-006`, `ARCH-004`) und `TEST-007` soll das per DOM-/Wording-Scan beweisen.
   Gleichzeitig verlangt `ROLLBACK-002`, den alten Tab bis zur Human Acceptance zu behalten.
-  Ein repo-weiter Scan trifft damit zwangsläufig den Altbestand. Zwei Auflösungen sind
-  möglich, und **nur der Nutzer darf wählen** — die eine hält den Nachweis scharf, die
-  andere macht ihn wertlos:
-  - **(a) Scan auf den neuen Flow begrenzen** (`src/utils/relationship/**`,
-    `src/components/relationship/**`, `src/api/relationshipClient.ts`, neue Route) —
-    Nachweis bleibt scharf, Altbestand bleibt unberührt und dokumentiert bestehen.
-  - **(b) Score repo-weit entfernen** — widerspricht `ROLLBACK-002` und der bestätigten
-    P7-Entscheidung; wäre eine Rücknahme einer früheren Nutzerentscheidung.
-  Solange offen, ist dies eine `CONTRA`-Kandidatin, keine stillschweigende Annahme.
+  Ein repo-weiter Scan trifft damit zwangsläufig den Altbestand.
+  **Nutzerentscheidung 2026-07-20: Variante (a) — Scan auf den neuen Flow begrenzen.**
+  `TEST-007` wird als **neue** Datei `src/__tests__/relationshipNoScore.test.ts` angelegt und
+  scannt ausschließlich `src/utils/relationship/**`, `src/components/relationship/**`,
+  `src/api/relationshipClient.ts` und die Antwort der neuen Route. Ergänzt um einen
+  **Static-Import-Guard**: der neue Flow importiert `compareProfiles` nirgends.
+  Der P7-Altbestand (`Synastry.tsx:242`, `synastry.ts`, `synastryWording.test.ts`) bleibt
+  unberührt; `ROLLBACK-002` und die P7-Entscheidung D-SCORE bleiben intakt.
+  Damit ist R5 aufgelöst — **keine** offene `CONTRA`.
+
+  *Verbleibende Grenze, ehrlich benannt:* der Nachweis gilt für den neuen Flow, nicht für
+  die App als Ganzes. Solange beide Tabs sichtbar sind, kann ein Nutzer weiterhin einen
+  Score sehen — nur eben nicht im Western-Synastry-Flow. Das ist der Preis von
+  `ROLLBACK-002` und wird beim Human-Acceptance-Gate erneut vorgelegt.
 - **R6 — Pastellästhetik verdeckt Verständnisprobleme** (PRD `RISK-005`). Mitigation:
   Usability-Gate vor Tiefenausbau; Kontrast-/Fokus-Tests statt Geschmacksurteil.
 - **R7 — Fremdes Profil würde fremde Geburtsdaten verarbeiten** (PRD `RISK-006`, p0).
@@ -235,10 +241,11 @@ Status: **CONFIRMED**
 
 ## Allowed change scope
 
-Status: **OPEN QUESTION** — Liste ist der Vorschlag; sie wird mit dem Canvas bestätigt.
+Status: **CONFIRMED** — Nutzerentscheidung 2026-07-20: *eng, nur neue Dateien*.
 
 Fail-closed (Phase 0.6). `plumbline-scope-check` prüft jede Increment-Dateiliste gegen diese
-Muster. Abgeleitet aus der Dateiliste des Plans plus den zwei verifizierten Anker-Dateien.
+Muster. **Nur neu angelegte Dateien.** Jede Berührung einer Bestandsdatei ist ein harter
+Stop mit Rückfrage — auch dann, wenn der Plan sie als `modify` führt.
 
 - `src/types/relationship.ts`
 - `src/utils/relationship/`
@@ -249,20 +256,36 @@ Muster. Abgeleitet aus der Dateiliste des Plans plus den zwei verifizierten Anke
 - `src/styles/relationship.css`
 - `src/server/relationshipTransport.ts`
 - `src/server/app.relationship.test.ts`
-- `src/server/app.ratelimit.test.ts`
-- `src/server/app.ts`
-- `src/App.tsx`
-- `src/components/PageShell.tsx`
-- `src/index.css`
-- `src/api/bazodiacClient.ts`
-- `src/__tests__/synastryWording.test.ts`
+- `src/__tests__/relationshipNoScore.test.ts`
 - `src/__tests__/relationshipContrast.test.ts`
 - `tests/e2e/relationship-real-boundary.spec.ts`
 - `docs/`
 
-**Nicht im Scope** (Änderung erfordert Rückfrage): `src/utils/synastry.ts`,
-`src/components/Synastry.tsx`, `src/utils/interAspects.ts` (nur lesend wiederverwenden),
-`src/utils/fufireClient.ts`, `supabase/`, `package.json`, alles unter FuFirE.
+### Bekannte, eingeplante Scope-Stops
+
+Diese Bestandsdateien nennt der Plan als `modify`. Sie sind **out of scope**; der Lauf hält
+an und fragt. Sie sind hier gelistet, damit die Unterbrechungen vorhersehbar sind und
+gebündelt entschieden werden können statt einzeln zu tröpfeln:
+
+| Datei | Wofür | Task |
+|---|---|---|
+| `src/server/app.ts` | Route `POST /api/relationships/western-synastry` registrieren; `/api/relationships` in den Compute-Limiter (`:455`) aufnehmen | TASK-008 |
+| `src/App.tsx`, `src/components/PageShell.tsx` | additiver, feature-geflaggter Navigationseintrag | TASK-012 |
+| `src/index.css` | Import der scoped Relationship-Tokens | TASK-013 |
+| `src/api/bazodiacClient.ts` | laut Plan `modify`; vermutlich vermeidbar, da `relationshipClient.ts` neu ist | TASK-009 |
+
+**Ohne Freigabe von `src/server/app.ts` ist der Durchstich nicht lauffähig** — die Route
+existiert dann nur als Modul, nicht als erreichbarer Endpunkt. Das ist genau die Klasse
+„existiert in Tests, nie in Produktion komponiert", die die `wired-in-prod?`-Spalte
+sichtbar machen soll. Der Stop bei TASK-008 ist deshalb der wichtigste des Laufs.
+
+### Ausdrücklich nicht im Scope (auch nicht auf Rückfrage im MVP)
+
+`src/utils/synastry.ts` · `src/components/Synastry.tsx` · `src/__tests__/synastryWording.test.ts`
+(P7-Altbestand, bleibt unberührt — Nutzerentscheidung R5-a) · `src/utils/interAspects.ts` und
+`src/utils/fufireClient.ts` (nur lesend wiederverwenden) · `src/server/app.ratelimit.test.ts`
+(existiert; der Relationship-Rate-Limit-Nachweis kommt stattdessen in die neue
+`src/server/app.relationship.test.ts`) · `supabase/` · `package.json` · alles unter FuFirE.
 
 ---
 
@@ -278,12 +301,26 @@ Muster. Abgeleitet aus der Dateiliste des Plans plus den zwei verifizierten Anke
 
 ## User confirmation
 
-**Confirmed by user:** no
+**Confirmed by user:** no — **ausstehend**
 **Confirmation date:** —
 **Confirmation note:** —
 
-Offene Punkte, die vor dem Confirm entschieden werden müssen:
-1. **R5** — Score-Scan auf den neuen Flow begrenzen (a) oder Score repo-weit entfernen (b)?
-2. **Allowed change scope** — Liste so bestätigen oder anpassen?
-3. **R4** wird als bekannte Grenze mitbestätigt: dieser Lauf endet nach TASK-013 mit
-   Evidenzklasse `integration` und **nicht** als MVP-Done.
+Alle Felder sind beantwortet; kein Feld steht mehr auf `MISSING` oder `OPEN QUESTION`.
+Vorentscheidungen des Nutzers vom 2026-07-20, die in diesen Canvas eingeflossen sind:
+
+| # | Entscheidung | Wirkung |
+|---|---|---|
+| D1 | Zielrepo `astro-synestrie`, Fork mit voller New_Bazi-Historie | Repo umgebaut, `upstream` erhalten |
+| D2 | Lauf-Scope TASK-001…013, dann Gate | Evidenzklasse endet bei `integration` |
+| D3 | Warum jetzt: **Marktvalidierung vor Investment** | prägt Success Signal Stufe 2 |
+| D4 | R5 = Variante (a): Score-Scan auf neuen Flow begrenzen | P7-Altbestand unberührt |
+| D5 | Allowed change scope **eng**: nur neue Dateien | Bestandsdateien = harter Stop |
+
+Mit dem Confirm bestätigst du zugleich die drei Grenzen, die dieser Lauf **nicht**
+überschreitet:
+
+1. **R4** — ohne Staging-Credentials kein `real-boundary-smoke`. Der Lauf endet nach
+   TASK-013 bei Evidenzklasse `integration` und wird **nicht** als MVP-Done gemeldet.
+2. **D5** — `src/server/app.ts` ist out of scope. Ohne separate Freigabe ist die Route
+   nicht in Produktion verdrahtet (`wired-in-prod? = no`) und der Durchstich nicht lauffähig.
+3. **Keine öffentliche Freigabe** — `SEC-005` / `AC-013` bleiben blockiert.
