@@ -1,7 +1,7 @@
 # Product Vision: Western Synastry — Beziehungsmuster ohne Urteil
 
 **Feature-Slug:** `western-synastry`
-**Status:** `draft` — **nicht bestätigt**
+**Status:** `user-confirmed` · **Bestätigt durch Nutzer:** ja (2026-07-21)
 **Erstellt:** 2026-07-21
 **Autor des Entwurfs:** Orchestrator (`/agileteam`). **Kein Agent darf selbst bestätigen.**
 **Canvas-Link:** [docs/canvas/western-synastry.canvas.md](../canvas/western-synastry.canvas.md) (user-confirmed, Amendment 2)
@@ -163,6 +163,8 @@ Diese Vision endet, wo der Canvas §7 endet. Ausdrücklich **nicht** Teil dieses
 
 | # | Punkt | Wer entscheidet |
 |---|---|---|
-| F-32 | Steuernder Parameter der Abtastung (`birth_time_known` false vs. true × explizite Zeiten) | **Nutzer** — Architektur |
-| R10b | Ehrt FuFirE bei `birth_time_known:false` die Uhrzeit? | Spike, braucht `FUFIRE_API_KEY` |
+| F-32 | ~~Steuernder Parameter der Abtastung~~ | **entschieden 2026-07-21 → D11**: explizite Zeiten mit `birth_time_known:true` |
+| R10a | ~~Sendet der Client verschiedene Uhrzeiten?~~ | **geschlossen** durch D11 — der Pfad wird nicht mehr benutzt |
+| R10b | Ehrt FuFirE bei `birth_time_known:false` die Uhrzeit? | **nicht mehr auf dem kritischen Pfad** (D11). Bleibt als Diagnose offen. |
 | R13 | Rechtsgrundlage / Art.-14-Hinweis | **Nutzer** — bis dahin D8: synthetische Zweitpersonen |
+| NEU | Trägt die Aggregationsschicht die Ehrlichkeitspflicht, die durch D11 von der Engine zu uns wandert? | Invariante `REL-HONESTY-01`, im Plan zu verankern |
