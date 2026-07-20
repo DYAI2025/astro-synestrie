@@ -1,0 +1,24 @@
+{
+  "feature": "western-synastry",
+  "canvas": "docs/canvas/western-synastry.canvas.md",
+  "confirmed_by_user": "2026-07-20 (Amendment 2)",
+  "note": "Machine-readable mirror of the canvas 'Allowed change scope'. D5 = new files only; D10 additionally opens scripts/, playwright.config.ts and src/__fixtures__/ for diagnosis and evidence repair. Files the plan calls 'modify' (src/server/app.ts, src/App.tsx, src/components/PageShell.tsx, src/index.css, src/api/bazodiacClient.ts) are deliberately ABSENT: each is a hard stop requiring a separate user release.",
+  "allowed_change_scope": [
+    "src/types/relationship.ts",
+    "src/utils/relationship/**",
+    "src/api/relationshipClient.ts",
+    "src/api/relationshipClient.test.ts",
+    "src/components/relationship/**",
+    "src/content/relationship/**",
+    "src/styles/relationship.css",
+    "src/server/relationshipTransport.ts",
+    "src/server/app.relationship.test.ts",
+    "src/__tests__/relationshipNoScore.test.ts",
+    "src/__tests__/relationshipContrast.test.ts",
+    "tests/e2e/relationship-real-boundary.spec.ts",
+    "scripts/**",
+    "playwright.config.ts",
+    "src/__fixtures__/**",
+    "docs/**"
+  ]
+}

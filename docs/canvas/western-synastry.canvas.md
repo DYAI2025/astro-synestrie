@@ -1,10 +1,10 @@
-<!-- Status: draft -->
-<!-- Confirmed by user: no — amended after council + audit, re-confirmation required -->
+<!-- Status: user-confirmed -->
+<!-- Confirmed by user: yes (2026-07-20, Amendment 2) -->
 
 # Product Canvas — Western Synastry MVP (astro-synestrie)
 
 **Feature slug:** `western-synastry`
-**Status:** draft (Amendment 2) · **Confirmed by user:** no — **Re-Confirm ausstehend**
+**Status:** user-confirmed (Amendment 2) · **Confirmed by user:** yes (2026-07-20)
 **Vorherige Bestätigung:** 2026-07-20 (Amendment 1) — durch Council- und Audit-Befunde überholt
 **Autor des Entwurfs:** Orchestrator (`/agileteam`)
 **Repo:** `DYAI2025/astro-synestrie` (Fork von `DYAI2025/New_Bazi`, `upstream` erhalten)
@@ -185,8 +185,18 @@ haben ebenfalls keinen Test.*
 
 **R3 — Frontend-Regeln divergieren bei einem zweiten Consumer** (`RISK-003`). → `API-001`.
 
-**R4 — Staging-Credentials fehlen** (`OPEN-002`, p0). Stufe 2 unerreichbar. Durch D6 nicht mehr
-laufkritisch: das Lernen hängt nicht mehr daran.
+**R4 — Credentials — in Amendment 2 aufgeschlüsselt und deutlich entschärft.** `OPEN-002`
+führte „Staging-Credentials" als **einen** monolithischen p0-Blocker. Gemessen am 2026-07-20
+zerfällt das:
+- `https://api.fufire.space/health` → **HTTP 200** (0,47 s); `/v1/calculate/western` → **401**.
+  Die Engine **lebt**, der Endpunkt existiert und verlangt nur einen Schlüssel.
+- **Stufe 0** braucht damit ausschließlich `FUFIRE_API_KEY` — ein Secret, keine Umgebung.
+- **Stufe 1** braucht **gar nichts**: sie läuft auf den in Stufe 0 aufgezeichneten Fixtures.
+- **Stufe 2** braucht weiterhin FuFirE-Key + `SUPABASE_SERVICE_ROLE_KEY` + Testnutzer +
+  laufende App + den R11-Fix.
+Weder `FUFIRE_API_KEY` noch `SUPABASE_SERVICE_ROLE_KEY` sind aktuell in der Umgebung gesetzt;
+es existiert nur `.env.example` mit `replace_me`-Platzhaltern. Der PRD ließ den billigen,
+klärenden Test dadurch so blockiert erscheinen wie den teuren.
 
 **R5 — Score-Kollision mit dem P7-Bestand — aufgelöst (D4).** Der No-Score-Nachweis entsteht als
 neue Datei `src/__tests__/relationshipNoScore.test.ts`, gescopt auf den neuen Flow, plus
@@ -284,23 +294,35 @@ Status: **CONFIRMED**
 
 ## Allowed change scope
 
+- src/types/relationship.ts
+- src/utils/relationship/**
+- src/api/relationshipClient.ts
+- src/api/relationshipClient.test.ts
+- src/components/relationship/**
+- src/content/relationship/**
+- src/styles/relationship.css
+- src/server/relationshipTransport.ts
+- src/server/app.relationship.test.ts
+- src/__tests__/relationshipNoScore.test.ts
+- src/__tests__/relationshipContrast.test.ts
+- tests/e2e/relationship-real-boundary.spec.ts
+- scripts/**
+- playwright.config.ts
+- src/__fixtures__/**
+- docs/**
+
+## Scope-Erläuterung (nicht maschinengelesen)
+
 Status: **CONFIRMED** (D5 eng, durch **D10** gezielt geöffnet)
 
-Fail-closed (Phase 0.6). `plumbline-scope-check` prüft jede Increment-Dateiliste hiergegen.
+Fail-closed (Phase 0.6). Die Liste oben enthält **nur** Pfade, ohne Backticks und ohne Prosa —
+`plumbline-scope-check` parst sie zeilenweise, und formatiertes Markdown macht sie unlesbar.
+Ein maschinenlesbares Spiegelbild liegt in `docs/scope/western-synastry.scope.json`.
 
-**Neue Dateien (frei):**
-- `src/types/relationship.ts` · `src/utils/relationship/` · `src/api/relationshipClient.ts` (+Test)
-- `src/components/relationship/` · `src/content/relationship/` · `src/styles/relationship.css`
-- `src/server/relationshipTransport.ts` · `src/server/app.relationship.test.ts`
-- `src/__tests__/relationshipNoScore.test.ts` · `src/__tests__/relationshipContrast.test.ts`
-- `tests/e2e/relationship-real-boundary.spec.ts` · `docs/`
+`scripts/**`, `playwright.config.ts` und `src/__fixtures__/**` sind durch **D10** geöffnet,
+ausschließlich für Diagnose (Engine-Spike, R10) und Nachweis-Reparatur (R11).
 
-**Durch D10 geöffnet — nur für Diagnose und Nachweis-Reparatur:**
-- `scripts/` — neuer Engine-Spike (additiv)
-- `playwright.config.ts` — R11-Fix
-- `src/__fixtures__/` — neue, echt aufgezeichnete Fixtures
-
-**Weiterhin harter Stop mit Rückfrage:**
+**Weiterhin harter Stop mit Rückfrage** — bewusst **nicht** in der Liste oben:
 
 | Datei | Wofür |
 |---|---|
@@ -328,8 +350,14 @@ Fail-closed (Phase 0.6). `plumbline-scope-check` prüft jede Increment-Dateilist
 
 ## User confirmation
 
-**Confirmed by user:** no — **Re-Confirm ausstehend**
-**Confirmation date:** —
+**Confirmed by user:** yes
+**Confirmation date:** 2026-07-20 (Amendment 2)
+**Confirmed by:** Benjamin Poersch (Product Owner)
+**Confirmation note:** Erneute Bestätigung nach Council und unabhängigem Audit, ausdrücklich
+einschließlich der Korrektur in §1 (Häuser/Achsen sind durch `BIRTH-TIME-01` bereits
+geschützt — Amendment 1 hatte das falsch behauptet und war in dieser falschen Fassung
+bestätigt worden), der neuen Stufenfolge D6 und der Zusage, bei negativem Engine-Spike (R10)
+zu stoppen und zu berichten statt weiterzubauen.
 
 ### Entscheidungsprotokoll dieses Laufs
 
