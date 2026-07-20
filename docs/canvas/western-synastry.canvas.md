@@ -1,45 +1,66 @@
-<!-- Status: user-confirmed -->
-<!-- Confirmed by user: yes (2026-07-20) -->
+<!-- Status: draft -->
+<!-- Confirmed by user: no — amended after council + audit, re-confirmation required -->
 
 # Product Canvas — Western Synastry MVP (astro-synestrie)
 
 **Feature slug:** `western-synastry`
-**Status:** user-confirmed · **Confirmed by user:** yes (2026-07-20)
-**Autor des Entwurfs:** Orchestrator (`/agileteam`), abgeleitet aus PRD + Entscheidungsprotokoll + Repo-Inspektion
-**Repo:** `DYAI2025/astro-synestrie` (Fork von `DYAI2025/New_Bazi`, upstream-Remote erhalten)
+**Status:** draft (Amendment 2) · **Confirmed by user:** no — **Re-Confirm ausstehend**
+**Vorherige Bestätigung:** 2026-07-20 (Amendment 1) — durch Council- und Audit-Befunde überholt
+**Autor des Entwurfs:** Orchestrator (`/agileteam`)
+**Repo:** `DYAI2025/astro-synestrie` (Fork von `DYAI2025/New_Bazi`, `upstream` erhalten)
 
 **Quellartefakte:**
-- PRD: `docs/prd/prd_report.md` / `docs/prd/prd_report.json`
+- PRD: `docs/prd/prd_report.md` / `.json`
 - Entscheidungen: `docs/decisions/2026-07-19-western-synastry-decisions.md` (DEC-01…08, TECH-INV-01…04)
-- Plan: `docs/plans/2026-07-19-western-synastry-mvp-throughline.md` (TASK-001…018)
-- Handoff: `docs/handoff/CODING_AGENT_HANDOFF.md`
+- Plan: `docs/plans/2026-07-19-western-synastry-mvp-throughline.md` — **wird gemäß D9 neu geschrieben**
+- Vorreviews (nicht unabhängig): `docs/reviews/ULTRATHINK_CRAFTSMANSHIP_REVIEW.md`, `docs/reviews/EVIDENCE_DIALECTIC_VALIDATION.md`
+- **Unabhängiger Audit: `docs/reviews/2026-07-20-independent-blindspot-audit.md` (30 bestätigte Befunde)**
 
 > Erlaubte Status-Werte: `draft` | `user-confirmed` | `blocked`. **Kein Agent darf selbst
-> bestätigen.** Bis `user-confirmed` bleiben Planning und Coding gesperrt
-> (`plumbline-start-check` → `VISION_MISSING`).
+> bestätigen.** Diese Fassung ist geändert und daher zurück auf `draft`.
+
+---
+
+## Was sich in Amendment 2 geändert hat
+
+| Auslöser | Änderung |
+|---|---|
+| Council-Konvergenz (alle 3 Rollen) | §5 Success Signal neu: Lernen kommt **vor** Infrastruktur (D6) |
+| Council Punkt 1 | §4 um sichtbare Auswahlregel ergänzt (D7) |
+| Council Punkt 3 | §8 R13 + §9: synthetische Zweitpersonen bis zur Rechtsprüfung (D8) |
+| Audit **F-07** | §1 sachlich **korrigiert** — mein Fehler, siehe unten |
+| Audit **F-01** | §8 R10 + §9: Engine-Spike als Pflichtbeleg |
+| Audit **F-26** | §8 R11 — der Real-Boundary-Befehl ist heute ein Mock-Lauf |
+| D9 | Plan wird neu geschrieben statt geflickt |
+| D10 | Allowed change scope gezielt geöffnet |
 
 ---
 
 ## 1. Problem
 
-Status: **CONFIRMED**
+Status: **CONFIRMED** (in Amendment 2 sachlich korrigiert)
 
-Die bestehende Synastrie erzeugt Scheinobjektivität an drei Stellen — alle **belegt** im
-aktuellen Code:
+Die bestehende Synastrie erzeugt Scheinobjektivität — aber **nicht überall dort, wo
+Amendment 1 das behauptet hat.** Die Korrektur steht bewusst hier und nicht in einer Fußnote:
 
-1. **Der Score.** `compareProfiles()` (`src/utils/synastry.ts:47`) verrechnet eine
-   Day-Master-Relation und einen Sonnenzeichen-Element-Bucket zu einer Zahl. Das BFF ruft
-   sie in `/api/azodiac/synastry` auf (`src/server/app.ts:32,674,688`), die UI rendert sie
-   als „Primus-Aspectus (PA)" (`src/components/Synastry.tsx:242`). Eine Zahl, die wie ein
-   Urteil über die Beziehung aussieht, ruht auf zwei Datenpunkten.
-2. **Die stille 12:00.** Unbekannte Geburtszeit wird auf `12:00` gesetzt
-   (`src/utils/birthInputValidation.ts`). Zeitabhängige Signale — Mond, Häuser, Achsen —
-   werden damit als exakt behandelt, obwohl sie geraten sind.
-3. **Keine Einwilligung.** Die Daten der zweiten Person werden erfasst, ohne dass der Nutzer
-   je erklärt, dass diese Person zugestimmt hat.
-
-Der Nutzer bekommt eine Note statt nachvollziehbarer Substanz — und die App behauptet
-implizit Präzision und Legitimation, die sie nicht hat.
+1. **Der Score — belegt.** `compareProfiles()` (`src/utils/synastry.ts:47`) verrechnet eine
+   Day-Master-Relation und einen Sonnenzeichen-Element-Bucket zu einer Zahl. Aufgerufen in
+   `src/server/app.ts:32,688`, gerendert als „Primus-Aspectus (PA)"
+   (`src/components/Synastry.tsx:242`). Eine Zahl, die wie ein Urteil aussieht, ruht auf zwei
+   Datenpunkten.
+2. **Die stille 12:00 — teilweise belegt, teilweise widerlegt.**
+   `src/utils/birthInputValidation.ts:97` setzt bei unbekannter Zeit hart `12:00`.
+   **Amendment 1 behauptete, Häuser und Achsen würden dadurch als exakt behandelt. Das ist
+   falsch.** `src/utils/fufireNormalizer.ts:229-238` implementiert bereits die
+   `BIRTH-TIME-01`-Invariante: `ascendantProvisional = !timeKnown || …`, mit dem expliziten
+   Kommentar, `provisional_fields` der Engine sei *„an ADDITIONAL trigger, never the sole
+   one"*. Häuser und Aszendent sind also lokal geschützt.
+   **Was stehen bleibt:** für den **Mond** existiert dieser Schutz nicht. Er ist das
+   zeitempfindlichste Signal (~13°/Tag) und wird ohne Provisorik-Markierung durchgereicht.
+   Genau darauf zielt DEC-03.
+3. **Keine Einwilligung — belegt.** Die Daten der zweiten Person werden erfasst, ohne dass der
+   Nutzer je erklärt, dass diese Person zugestimmt hat. Darüber hinaus (Council/Audit): es gibt
+   **keine dokumentierte Rechtsgrundlage und keinen Art.-14-Hinweis** — siehe R13.
 
 ---
 
@@ -48,12 +69,15 @@ implizit Präzision und Legitimation, die sie nicht hat.
 Status: **CONFIRMED**
 
 Eine **angemeldete Person, die Beziehungsmuster reflektieren will, ohne ein Urteil zu
-bekommen** (PRD `INFO-004`). Sie hat ein eigenes Profil oder legt eines an, und bringt die
-Geburtsdaten einer zweiten Person mit, deren Zustimmung sie erklären kann.
+bekommen** (PRD `INFO-004`).
 
-Explizit **nicht** adressiert: Ratsuchende in Beziehungskrisen (kein Therapie-/Beratungs-
-kontext), anonyme Nutzer ohne Konto (kein Demo-Profil-Fallback), B2B-Consumer der Regeln
-(→ `API-001`).
+*Offene Gegenevidenz, ehrlich geführt (Challenger):* die einzige real dokumentierte
+Nutzerentscheidung in diesem Repo ging in die andere Richtung — D-SCORE (2026-06-14) hat den
+Score **behalten**. `INFO-004` beschreibt damit möglicherweise den Wunschnutzer, nicht den
+belegten. Das aufzulösen ist der Zweck von D6.
+
+Nicht adressiert: Ratsuchende in Beziehungskrisen · anonyme Nutzer ohne Konto · B2B-Consumer
+der Regeln (→ `API-001`).
 
 ---
 
@@ -62,49 +86,56 @@ kontext), anonyme Nutzer ohne Konto (kein Demo-Profil-Fallback), B2B-Consumer de
 Status: **CONFIRMED**
 
 Nutzer öffnen den bestehenden Synastry-Tab, lesen den PA-Wert und die Paar-Sektionen und
-interpolieren den Rest selbst. Unsicherheit aus unbekannter Zeit ist unsichtbar — sie
-verschwindet hinter der 12:00-Ersetzung. Westliche Inter-Aspekte existieren zwar als Modul
-(`src/utils/interAspects.ts`), speisen aber keinen evidenzgebundenen, unsicherheits-
-bewussten Beziehungsblick.
+interpolieren den Rest. Zeitunsicherheit ist beim Mond unsichtbar. Westliche Inter-Aspekte
+existieren als Modul (`src/utils/interAspects.ts`), speisen aber keinen evidenzgebundenen
+Beziehungsblick.
 
 ---
 
 ## 4. Value proposition
 
-Status: **CONFIRMED**
-
-Ein **echt gerechneter, evidenzgebundener Beziehungsblick ohne Note**:
+Status: **CONFIRMED** (um D7 ergänzt)
 
 - **Echte Berechnung statt Demo.** Jeder Samplepunkt geht durch das BFF an das reale FuFirE
-  `POST /v1/calculate/western`. Kein Placeholder, kein Fixture, kein gemockter Upstream darf
-  den Durchstich belegen (DEC-08).
-- **Unsicherheit sichtbar statt still.** `exact` / `approximate` / `unknown` sind getrennte
-  Modi; ungenaue Zeit erzeugt Start/Mitte/Ende-Samples und einen sichtbaren Status
-  `stable` / `provisional` / `unavailable` — der Mittelpunkt heißt nie „Geburtszeit" (DEC-02/03).
-- **Substanz statt Umfang.** Bis zu drei Muster, jedes mit beiden Körperrollen, Aspekt,
-  Orb-Spanne und Sampleabdeckung — oder ein ehrlicher Missing-State (DEC-06).
-- **Kein Urteil.** Kein Prozentwert, keine Kompatibilitätsaussage, kein `confidence`-Feld
-  das Präzision verwischt (TECH-INV-02).
-- **Einwilligung als Erklärung, nicht als Prüfung.** Der Nutzer bestätigt; die App behauptet
-  nirgends, das geprüft zu haben (DEC-01).
+  `POST /v1/calculate/western` (DEC-08).
+- **Unsicherheit sichtbar statt still.** `exact`/`approximate`/`unknown` getrennt; ungenaue
+  Zeit erzeugt Start/Mitte/Ende-Samples mit sichtbarem Status. Der Mittelpunkt heißt nie
+  „Geburtszeit" (DEC-02/03).
+- **Substanz statt Umfang.** Wenige Muster, jedes mit beiden Körperrollen, Aspekt, Orb-Spanne
+  und Sampleabdeckung — oder ehrlicher Missing-State.
+- **Kein verstecktes Urteil (D7, neu).** Die Note fällt weg *und* die **Auswahlregel wird im
+  UI offengelegt**. Der Council hat belegt: Ranking plus Trunkierung auf drei Muster **ist**
+  ein Urteil, auch ohne Zahl (`plan:790-792`). Ein Produkt, das Evidenz verlangt, muss die
+  eigene Selektionsregel als Evidenz behandeln. Sie wird gerendert und getestet, nicht
+  wegdefiniert.
+- **Einwilligung als Erklärung, nicht als Prüfung** (DEC-01) — mit dem offenen Rechtsproblem
+  aus R13 daneben, nicht darunter.
 
 ---
 
 ## 5. Success signal
 
-Status: **CONFIRMED** (zweistufig — die Stufen dürfen nicht vermischt werden)
+Status: **CONFIRMED** (durch D6 neu geordnet — Lernen vor Infrastruktur)
 
-**Stufe 1 — Realitätsnachweis (TASK-015).** Der Flow Profil → Partner → Consent → echte
-FuFirE-Berechnung → Ergebnis läuft browser-live gegen echte Auth-, Profil- und FuFirE-
-Grenzen, ohne Route-Interception. Evidenzklasse `real-boundary-smoke`, Request-ID
-protokolliert, ohne PII. **Grüne Unit-/Route-Tests sind kein Ersatz** — sie belegen interne
-Korrektheit, nicht Auslieferung des Nutzwerts.
+Amendment 1 hatte die Reihenfolge falsch: Realitätsnachweis zuerst, Verständnisnachweis
+danach. Der Council hat gezeigt, dass diese Reihenfolge im gewählten Lauf-Scope **null
+Marktsignal** erzeugt — TASK-016 lag hinter zwei Blockern. Neue Ordnung:
 
-**Stufe 2 — Verständnisnachweis (TASK-016).** Fünf moderierte Sessions. Beobachtet wird:
-Schließen Nutzer die Aufgaben ohne Hilfe ab; lesen sie die Muster, statt nach einer
-Gesamtnote zu fragen; verstehen sie, was `provisional` bedeutet; halten sie die Consent-
-Formulierung für eine Prüfung. Qualitative Beobachtungen werden **nicht** zu einer Kennzahl
-gemittelt.
+**Stufe 0 — Engine-Wahrheit (neu, Pflicht vor allem anderen).** FuFirE wird mit **drei
+verschiedenen Uhrzeiten** und `birth_time_known:false` live aufgerufen; die Responses werden als
+Fixtures committet. Erfolg = die drei Charts unterscheiden sich nachweislich. Schlagen sie
+nicht auseinander, ist DEC-03 als Ganzes hinfällig und der Lauf stoppt mit User-Report.
+Präzedenz im eigenen Repo: `REQ-P4-001` in `docs/prd/bazi-sprint-p4-unknown-time.prd.md:28`.
+
+**Stufe 1 — Verständnis- und Wollen-Nachweis (vorgezogen, D6).** Fixture-Prototyp, fünf
+moderierte Sessions. Beobachtet wird nicht nur Verständnis, sondern **Nachfrage**: Würden sie
+das auf eine zweite Person anwenden? Kommen sie unaufgefordert zurück? Zusätzlich A/B
+**ranked-three gegen unranked-all**, sonst beantwortet der Test D7 nicht. Qualitative
+Beobachtungen werden **nicht** zu einer Kennzahl gemittelt.
+
+**Stufe 2 — Realitätsnachweis (nachgelagert).** Flow gegen echte Auth-, Profil- und
+FuFirE-Grenzen, ohne Route-Interception, Evidenzklasse `real-boundary-smoke`.
+**Voraussetzung: R11 ist behoben** — der heutige Befehl beweist das nicht.
 
 ---
 
@@ -112,15 +143,14 @@ gemittelt.
 
 Status: **CONFIRMED**
 
-> Angemeldeter Nutzer wählt oder erstellt sein eigenes Profil (bei unbekannt gespeicherter
-> Zeit optional transient auf ein Zeitfenster präzisiert) → erfasst die zweite Person mit
-> Zeitmodus → prüft beide Datensätze und bestätigt die Zustimmungserklärung → das BFF
-> rechnet real → er liest bis zu drei evidenzgebundene Muster mit sichtbarer Stabilität und
-> eine Reflexionsfrage.
+> Angemeldeter Nutzer wählt oder erstellt sein eigenes Profil (bei unbekannt gespeicherter Zeit
+> optional transient auf ein Zeitfenster präzisiert) → erfasst die zweite Person mit Zeitmodus
+> → prüft beide Datensätze und bestätigt die Zustimmungserklärung → es wird real gerechnet →
+> er liest wenige evidenzgebundene Muster mit sichtbarer Stabilität, sichtbarer Auswahlregel
+> und einer Reflexionsfrage.
 
-Kleinster sinnvoller Ausschnitt. Alles darunter (nur Validator, nur Route) erzeugt keinen
-beobachtbaren Nutzerwert; alles darüber (sechs Dimensionen, Explorer, Print) ist erst nach
-dem Usability-Gate zulässig.
+Im Prototyp der Stufe 1 ist die zweite Person **synthetisch** (D8) und die Berechnung kommt aus
+einem echten, in Stufe 0 aufgezeichneten Fixture.
 
 ---
 
@@ -128,70 +158,92 @@ dem Usability-Gate zulässig.
 
 Status: **CONFIRMED**
 
-- Kein neuer FuFirE-Synastrie-/Match-Endpunkt; FuFirE wird in diesem MVP **nicht geändert**.
+- Kein neuer FuFirE-Endpunkt; FuFirE wird nicht geändert.
 - Kein Payment, Subscription, Entitlement, Marketplace.
-- Keine automatische Persistenz von Partnerdaten oder Analyseergebnis; keine DB-Migration.
+- Keine automatische Persistenz von Partnerdaten oder Ergebnis; keine DB-Migration.
 - Kein LLM-generierter Beziehungstext.
 - Keine Composite-, Davison-, Transit-, Progressions-, BaZi- oder Wu-Xing-Analyse.
-- Kein serverseitiges Premium-PDF vor dem Usability-Gate.
-- Kein Ausbau auf sechs Dimensionen / Explorer / Methodikansicht / Print vor dem Human Gate.
-- **Keine öffentliche Produktfreigabe** in diesem Lauf (PRD `INFO-001`, `SEC-005`, `AC-013`).
+- Kein serverseitiges PDF vor dem Usability-Gate.
+- Kein Ausbau auf sechs Dimensionen / Explorer / Print vor dem Human Gate.
+- **Keine öffentliche Produktfreigabe** (`SEC-005`, `AC-013`).
 - Der alte Synastry-Tab wird **nicht** entfernt (`ROLLBACK-002`).
+- **Keine Verarbeitung echter Zweitpersonendaten** vor der Rechtsprüfung (D8, neu).
 
 ---
 
 ## 8. Risks / contradictions
 
-Status: **CONFIRMED** — R5 durch Nutzerentscheidung aufgelöst (2026-07-20); R4 bleibt als
-bewusst akzeptierte Lauf-Grenze bestehen, nicht als offene Frage.
+Status: **CONFIRMED**
 
-- **R1 — Consent wird als geprüfte Zustimmung gelesen** (PRD `RISK-001`, *belegt als Risiko,
-  Wirksamkeit ungeprüft*). Mitigation: explizite Attestierungs-Formulierung, 422-Gate,
-  `verificationStatus: "user_attested_not_independently_verified"` im Transport. Ob echte
-  Nutzer die Unterscheidung *lesen*, ist erst nach TASK-016 bekannt.
-- **R2 — Diskretes Sampling ist kein Intervallbeweis** (PRD `RISK-002`, *belegt*). Drei
-  Samplepunkte können Verhalten zwischen den Punkten verfehlen. Mitigation: Center-plus-
-  Majority-Schwelle, sichtbare Kennzeichnung als *sampled*, keine Kernaussage aus
-  `unavailable`. Der Text darf nie „gilt im ganzen Zeitfenster" behaupten.
-- **R3 — Frontend-Regeln divergieren bei einem zweiten Consumer** (PRD `RISK-003`).
-  Mitigation: Regelversionierung + `API-001` als Promotions-Gate.
-- **R4 — Staging-Credentials fehlen** (PRD `OPEN-002`, Priorität **p0**, *belegt*).
-  Ohne Staging-URL und Test-Credentials für FuFirE und Supabase sind TASK-014/015 nicht
-  ausführbar. **Konsequenz für diesen Lauf:** die MVP-Akzeptanz (`real-boundary-smoke`) ist
-  nicht erreichbar. Der Lauf endet nach TASK-013 mit Evidenzklasse `integration` und
-  **darf nicht als MVP-Done berichtet werden.** Das ist die vom Nutzer gewählte
-  Lauf-Scope-Entscheidung, nicht eine Herabstufung durch einen Agenten.
-- **R5 — Score-Kollision mit dem ausgelieferten P7-Stand (NEU, *belegt*, nicht im PRD).**
-  Der Vorgänger-Sprint `bazi-sprint-p7-partner-journey` hat mit Nutzerentscheidung
-  D-SCORE (2026-06-14) den Score **behalten** und in „Primus-Aspectus (PA)" umbenannt — er
-  steht heute in `src/components/Synastry.tsx:242`. Der neue PRD verbietet jeden Score
-  (`FR-007`, `AC-006`, `ARCH-004`) und `TEST-007` soll das per DOM-/Wording-Scan beweisen.
-  Gleichzeitig verlangt `ROLLBACK-002`, den alten Tab bis zur Human Acceptance zu behalten.
-  Ein repo-weiter Scan trifft damit zwangsläufig den Altbestand.
-  **Nutzerentscheidung 2026-07-20: Variante (a) — Scan auf den neuen Flow begrenzen.**
-  `TEST-007` wird als **neue** Datei `src/__tests__/relationshipNoScore.test.ts` angelegt und
-  scannt ausschließlich `src/utils/relationship/**`, `src/components/relationship/**`,
-  `src/api/relationshipClient.ts` und die Antwort der neuen Route. Ergänzt um einen
-  **Static-Import-Guard**: der neue Flow importiert `compareProfiles` nirgends.
-  Der P7-Altbestand (`Synastry.tsx:242`, `synastry.ts`, `synastryWording.test.ts`) bleibt
-  unberührt; `ROLLBACK-002` und die P7-Entscheidung D-SCORE bleiben intakt.
-  Damit ist R5 aufgelöst — **keine** offene `CONTRA`.
+**R1 — Consent wird als geprüfte Zustimmung gelesen** (`RISK-001`). Attestierungs-Formulierung,
+422-Gate, `verificationStatus: user_attested_not_independently_verified`. *Audit F-11: bis heute
+prüft kein Test die Formulierung — nur der Statuscode. Der neue Plan muss das schließen.*
 
-  *Verbleibende Grenze, ehrlich benannt:* der Nachweis gilt für den neuen Flow, nicht für
-  die App als Ganzes. Solange beide Tabs sichtbar sind, kann ein Nutzer weiterhin einen
-  Score sehen — nur eben nicht im Western-Synastry-Flow. Das ist der Preis von
-  `ROLLBACK-002` und wird beim Human-Acceptance-Gate erneut vorgelegt.
-- **R6 — Pastellästhetik verdeckt Verständnisprobleme** (PRD `RISK-005`). Mitigation:
-  Usability-Gate vor Tiefenausbau; Kontrast-/Fokus-Tests statt Geschmacksurteil.
-- **R7 — Fremdes Profil würde fremde Geburtsdaten verarbeiten** (PRD `RISK-006`, p0).
-  Mitigation: `requireUserAuth` + Lookup über `id + user_id`, 404 und **null** FuFirE-Aufrufe
-  bei fremder/fehlender ID (TECH-INV-03).
-- **R8 — DST-Kanten verschieben oder verdoppeln generierte Samples** (PRD `RISK-007`,
-  Status *assumption*). Mitigation: exakte nicht existente Zeit ablehnen; generierte Samples
-  `shift_forward` / ambige `earlier`, beides als Warning im Transport sichtbar.
-- **R9 — Vollständigkeitsdruck** (Prozessrisiko, aus dem Plan-Selbstcheck übernommen). Der
-  Anreiz, nach grünen Unit-Tests „fertig" zu melden, ist genau der Fehler, den DEC-07/08
-  adressieren. Mitigation: Reality Ledger; `integration` wird nie als MVP-Akzeptanz gemeldet.
+**R2 — Diskretes Sampling ist kein Intervallbeweis** (`RISK-002`). *Audit F-12: die beiden
+konkret benannten Wording-Fehler („gilt im ganzen Zeitfenster", Mittelpunkt als gemessene Zeit)
+haben ebenfalls keinen Test.*
+
+**R3 — Frontend-Regeln divergieren bei einem zweiten Consumer** (`RISK-003`). → `API-001`.
+
+**R4 — Staging-Credentials fehlen** (`OPEN-002`, p0). Stufe 2 unerreichbar. Durch D6 nicht mehr
+laufkritisch: das Lernen hängt nicht mehr daran.
+
+**R5 — Score-Kollision mit dem P7-Bestand — aufgelöst (D4).** Der No-Score-Nachweis entsteht als
+neue Datei `src/__tests__/relationshipNoScore.test.ts`, gescopt auf den neuen Flow, plus
+Static-Import-Guard gegen `compareProfiles`. P7-Bestand unberührt, `ROLLBACK-002` intakt.
+*Verbleibende Grenze:* der Nachweis gilt für den neuen Flow, nicht für die App als Ganzes.
+
+**R6 — Pastellästhetik verdeckt Verständnisprobleme** (`RISK-005`). *Audit F-21: der als „Fokus
+und Interaktion" gesetzte Token `--rel-peach #BB8588` erreicht gegen `--rel-bg` nur **2,56:1** —
+er verletzt die Designregel elf Zeilen weiter unten im selben Plan.*
+
+**R7 — Fremdes Profil verarbeitet fremde Geburtsdaten** (`RISK-006`, p0). `requireUserAuth` +
+`id + user_id`, 404, null Upstream. *Audit F-04: das BFF verbindet mit
+`SUPABASE_SERVICE_ROLE_KEY` (`src/server/supabase.ts:10,16`) — RLS-Policies `to authenticated`
+greifen dabei **nicht**. Der Owner-Filter ist reiner Anwendungscode, ohne DB-Netz darunter.*
+
+**R8 — DST-Kanten** (`RISK-007`). *Audit F-03: die aufgezeichnete Live-Response hat **kein
+Feld**, das eine Anpassung meldet — `timeResolution.adjusted` im geplanten Transport ist damit
+eine Erfindung des BFF, keine Weitergabe.*
+
+**R9 — Vollständigkeitsdruck.** Reality Ledger; `integration` gilt nie als MVP-Akzeptanz.
+
+**R10 — Die Abtastung könnte ein No-op sein (NEU, Audit F-01, unbewiesen).**
+`birth_time_known` kommt in PRD, Plan, Entscheidungen und beiden Vorreviews **null Mal** vor,
+ist aber der steuernde Parameter (`src/utils/fufirePayloadMappers.ts:133,149,164,187`).
+Ob FuFirE bei `birth_time_known:false` die übergebene Uhrzeit **ehrt** oder intern 12:00
+einsetzt, ist nicht belegt: der einzige vorhandene Spike
+(`scripts/fufire-unknown-time-spike.mts`) sendet ausgerechnet **12:00** und kann die beiden
+Fälle deshalb nicht unterscheiden. Ehrt die Engine die Uhr nicht, kollabieren alle drei Samples
+auf einen Chart und **jeder** Aspekt wird trivial `stable` — das Unsicherheitsfeature wäre ein
+No-op, der maximale Sicherheit anzeigt. Mitigation: **Stufe 0 Engine-Spike, vor allem anderen.**
+
+**R11 — Der Real-Boundary-Nachweis ist heute ein Mock-Lauf (NEU, Audit F-26, belegt).**
+`playwright.config.ts:36,40` setzt in `webServer.env` hart
+`FUFIRE_API_URL: http://localhost:${MOCK_PORT}` und `ENABLE_DEMO_PROFILES: "true"`.
+`RELATIONSHIP_REAL_BOUNDARY=1` ist eine Variable des Runner-Prozesses und erreicht dieses `env`
+nie. Der in Handoff, Plan, `TASK-014/015`, `AC-005`, `AC-007` und `DOD-002` als Realitätsbeleg
+benannte Befehl läuft folglich gegen `tests/e2e/mock-fufire.mjs` mit Demo-Profilen — und wäre
+grün geworden. Das ist exakt die Fehlerklasse, gegen die DEC-07/08 geschrieben wurden. Beide
+Vorreviews haben sie nicht gefunden. Mitigation: Config-Fix (D10 öffnet die Datei) **plus** ein
+Test, der beweist, dass der Real-Boundary-Lauf den Mock nicht erreicht.
+
+**R12 — Ranking ist ein Urteil — mitigiert (D7).** Siehe §4. Ohne offengelegte Auswahlregel
+wäre „kein Urteil" eine unbelegte Kernwertaussage.
+
+**R13 — Keine Rechtsgrundlage, keine Art.-14-Information (NEU, belegt).** grep über `docs/`
+nach legal basis / Art. 14 / DSGVO / GDPR: **null Treffer**. Eine von Person A angeklickte
+Checkbox ist keine Einwilligung von Person B. `RISK-001` behandelt das rein als Wording.
+Mitigation (D8): bis zur dokumentierten Rechtsprüfung ausschließlich **synthetische**
+Zweitpersonen — in Prototyp, Fixtures und Tests. Damit fallen Drittdaten weg und die Lücke
+liegt nicht auf dem kritischen Pfad zum Lernen.
+
+**R14 — Der Plan selbst ist defekt (NEU, D9).** Der unabhängige Audit hat **30** bestätigte
+Befunde erhoben, darunter widersprüchliche Musteranzahl (F-18: „mindestens drei" / „up to
+three" / „zero to three"), doppelt vergebene AC-IDs mit unterschiedlicher Bedeutung in PRD und
+Plan (F-16), `unknown`-Center = ausgerechnet 12:00 (F-17) und eine Kollision von `TASK-001` mit
+dem bestätigten Scope (F-23). Der Plan wird deshalb **neu geschrieben**, nicht geflickt.
+Die Diagnose lautet ausdrücklich *Nachweisführung defekt*, **nicht** *Produktidee falsch*.
 
 ---
 
@@ -199,133 +251,113 @@ bewusst akzeptierte Lauf-Grenze bestehen, nicht als offene Frage.
 
 Status: **CONFIRMED**
 
-**Bereits verifiziert (belegt, Repo-Inspektion 2026-07-20, HEAD `95c85c0`):**
-- `FuFirEClient.postWestern()` existiert — `src/utils/fufireClient.ts:223`.
-- `requireUserAuth` existiert und schützt bereits `/api/me/profiles` — `src/server/app.ts:5,820`.
-- Compute-Rate-Limiter existiert als `app.use(["/api/azodiac","/api/gemini"], …)` —
-  `src/server/app.ts:455`. `REQ-S-005` / TECH-INV-04 = `/api/relationships` in dieses Array.
-- `compareProfiles` wird in `src/server/app.ts:32,688` importiert und benutzt; Score-Label
-  „Primus-Aspectus (PA)" in `src/components/Synastry.tsx:242` (→ R5).
-- Ein Anti-Reifikations-Scanner existiert bereits (`src/__tests__/synastryWording.test.ts`)
-  und scannt auch UI-Chrome inkl. `src/components/synastry/` — er ist die vorhandene Basis
-  für `TEST-007`, muss aber gemäß R5-Entscheidung gescopt werden.
-- `src/utils/interAspects.ts`, `fufirePayloadMappers.ts`, `PlaceAutocomplete.tsx`,
-  `AccountMenu.tsx`, `birthInputValidation.ts` vorhanden; Playwright konfiguriert.
-- **Nichts vom neuen Flow existiert**: `src/types/relationship.ts`,
-  `src/utils/relationship/`, `src/components/relationship/`, `/api/relationships`,
-  `tests/e2e/relationship-real-boundary.spec.ts` — alle abwesend. TASK-001…015 unbegonnen.
-- Toolchain: node v24.16.0, npm 11.13.0, `npm ci` erfolgreich. `lint` = `tsc --noEmit`,
-  `test` = `vitest run`, `e2e` = `playwright test`.
-- **Baseline gemessen (2026-07-20, HEAD `95c85c0`), nicht angenommen:** `npm run lint`
-  → exit 0. `npm test` → **57 Test-Files, 783 Tests passed**, Dauer 8,54 s. Die im Log
-  sichtbaren `DOMException: Failed to load script "https://elevenlabs.io/convai-widget/index.js"`
-  stammen aus `src/components/AgentWidget.tsx:64` unter happy-dom (externes Script wird im
-  Testlauf nicht geladen) — Rauschen, kein Testfehler. Die Prämisse des Plans, auf einem
-  grünen Bestand aufzusetzen, ist damit **belegt**.
+**Belegt (Repo-Inspektion 2026-07-20):**
+- `FuFirEClient.postWestern()` — `src/utils/fufireClient.ts:223`.
+- `requireUserAuth` schützt `/api/me/profiles` — `src/server/app.ts:5,820`.
+- Compute-Limiter — `src/server/app.ts:455` (`["/api/azodiac","/api/gemini"]`, Default 20).
+- `compareProfiles` — `src/server/app.ts:32,688`; PA-Label `Synastry.tsx:242`.
+- `BIRTH-TIME-01`-Invariante bereits implementiert — `src/utils/fufireNormalizer.ts:229-238`.
+- Echte Live-Fixtures vorhanden — `src/__fixtures__/fufire/western.json` und
+  `src/__fixtures__/fufire/unknown-time/western.json` (letzteres mit
+  `provisional_fields: ["ascendant","houses","mc"]`). **In keinem Planungsartefakt zitiert.**
+- Nichts vom neuen Flow existiert; TASK-001…015 unbegonnen.
+- Baseline gemessen: `npm run lint` exit 0; `npm test` **57 Files / 783 Tests passed**, 8,54 s.
+  Die `DOMException`-Zeilen stammen aus happy-dom, das ein externes Script nicht lädt
+  (`AgentWidget.tsx:64`) — Rauschen, kein Failure.
+- Toolchain: node v24.16.0, npm 11.13.0, `npm ci` erfolgreich.
 
-**Noch zu erbringen, bevor Implementierung als real gilt:**
-- `npm run build` auf HEAD — bisher nicht ausgeführt (**ungeprüft**), wird in TASK-001
-  gemessen.
-- Pro Task: fokussierte Tests test-first (rot vor grün), Evidenzklasse pro REQ.
-- `real-boundary-smoke` (TASK-014/015) — **blockiert durch R4**.
-- `user-confirmed` (TASK-016) — nach dem Usability-Gate.
+**Pflichtbelege, bevor Feature-Code entsteht:**
+1. **Engine-Spike (Stufe 0):** drei **verschiedene** Uhrzeiten × `birth_time_known:false` →
+   Fixtures committen → belegen, dass die Body-Positionen auseinanderlaufen. Löst R10.
+2. **Mock-Dichtigkeitstest:** beweisen, dass der Real-Boundary-Lauf `mock-fufire.mjs` nicht
+   erreichen kann. Löst R11.
+3. `npm run build` auf HEAD — bisher **ungeprüft**.
 
-**Ausdrücklich ungeprüft (dürfen nicht als Prämisse weitergereicht werden):**
-- Dass Nutzer evidenzgebundene Muster ohne Note überhaupt als wertvoll erleben (`R5` des
-  PRD-Risikoregisters, Marktvalidierungs-Hypothese dieses MVP).
-- Dass FuFirE `/v1/calculate/western` alle für den Transportvertrag nötigen Felder liefert —
-  laut Plan eine Stop-and-ask-Bedingung, nicht verifiziert.
-- Dass fünf moderierte Sessions als erstes qualitatives Gate ausreichen (PRD `INFO-008`).
+**Ausdrücklich ungeprüft (nicht als Prämisse weiterreichen):**
+- Dass Nutzer evidenzgebundene Muster ohne Note als wertvoll erleben — die D3-Hypothese selbst.
+- Dass FuFirE alle für den Transportvertrag nötigen Felder liefert. *Audit F-02: `EVD-004`
+  zitiert dafür „FuFirE routers/western.py" mit Konfidenz 5/5 — eine Quelle, die in diesem Repo
+  gar nicht existiert, während die echten Fixtures ungenutzt danebenliegen.*
+- Dass fünf moderierte Sessions als erstes qualitatives Gate ausreichen (`INFO-008`).
 
 ---
 
 ## Allowed change scope
 
-Status: **CONFIRMED** — Nutzerentscheidung 2026-07-20: *eng, nur neue Dateien*.
+Status: **CONFIRMED** (D5 eng, durch **D10** gezielt geöffnet)
 
-Fail-closed (Phase 0.6). `plumbline-scope-check` prüft jede Increment-Dateiliste gegen diese
-Muster. **Nur neu angelegte Dateien.** Jede Berührung einer Bestandsdatei ist ein harter
-Stop mit Rückfrage — auch dann, wenn der Plan sie als `modify` führt.
+Fail-closed (Phase 0.6). `plumbline-scope-check` prüft jede Increment-Dateiliste hiergegen.
 
-- `src/types/relationship.ts`
-- `src/utils/relationship/`
-- `src/api/relationshipClient.ts`
-- `src/api/relationshipClient.test.ts`
-- `src/components/relationship/`
-- `src/content/relationship/`
-- `src/styles/relationship.css`
-- `src/server/relationshipTransport.ts`
-- `src/server/app.relationship.test.ts`
-- `src/__tests__/relationshipNoScore.test.ts`
-- `src/__tests__/relationshipContrast.test.ts`
-- `tests/e2e/relationship-real-boundary.spec.ts`
-- `docs/`
+**Neue Dateien (frei):**
+- `src/types/relationship.ts` · `src/utils/relationship/` · `src/api/relationshipClient.ts` (+Test)
+- `src/components/relationship/` · `src/content/relationship/` · `src/styles/relationship.css`
+- `src/server/relationshipTransport.ts` · `src/server/app.relationship.test.ts`
+- `src/__tests__/relationshipNoScore.test.ts` · `src/__tests__/relationshipContrast.test.ts`
+- `tests/e2e/relationship-real-boundary.spec.ts` · `docs/`
 
-### Bekannte, eingeplante Scope-Stops
+**Durch D10 geöffnet — nur für Diagnose und Nachweis-Reparatur:**
+- `scripts/` — neuer Engine-Spike (additiv)
+- `playwright.config.ts` — R11-Fix
+- `src/__fixtures__/` — neue, echt aufgezeichnete Fixtures
 
-Diese Bestandsdateien nennt der Plan als `modify`. Sie sind **out of scope**; der Lauf hält
-an und fragt. Sie sind hier gelistet, damit die Unterbrechungen vorhersehbar sind und
-gebündelt entschieden werden können statt einzeln zu tröpfeln:
+**Weiterhin harter Stop mit Rückfrage:**
 
-| Datei | Wofür | Task |
-|---|---|---|
-| `src/server/app.ts` | Route `POST /api/relationships/western-synastry` registrieren; `/api/relationships` in den Compute-Limiter (`:455`) aufnehmen | TASK-008 |
-| `src/App.tsx`, `src/components/PageShell.tsx` | additiver, feature-geflaggter Navigationseintrag | TASK-012 |
-| `src/index.css` | Import der scoped Relationship-Tokens | TASK-013 |
-| `src/api/bazodiacClient.ts` | laut Plan `modify`; vermutlich vermeidbar, da `relationshipClient.ts` neu ist | TASK-009 |
+| Datei | Wofür |
+|---|---|
+| `src/server/app.ts` | Route registrieren + `/api/relationships` in den Limiter (`:455`) |
+| `src/App.tsx`, `src/components/PageShell.tsx` | Navigationseintrag. *Audit F-28: `renderTab()` bricht bei `!viewModel \|\| !birthData` vorher ab — der Eingriff ist größer als „additiv"* |
+| `src/index.css` | Token-Import. *Audit F-29: ohne ihn wird `relationship.css` nie geladen* |
+| `src/api/bazodiacClient.ts` | vermutlich vermeidbar |
 
-**Ohne Freigabe von `src/server/app.ts` ist der Durchstich nicht lauffähig** — die Route
-existiert dann nur als Modul, nicht als erreichbarer Endpunkt. Das ist genau die Klasse
-„existiert in Tests, nie in Produktion komponiert", die die `wired-in-prod?`-Spalte
-sichtbar machen soll. Der Stop bei TASK-008 ist deshalb der wichtigste des Laufs.
-
-### Ausdrücklich nicht im Scope (auch nicht auf Rückfrage im MVP)
-
-`src/utils/synastry.ts` · `src/components/Synastry.tsx` · `src/__tests__/synastryWording.test.ts`
-(P7-Altbestand, bleibt unberührt — Nutzerentscheidung R5-a) · `src/utils/interAspects.ts` und
-`src/utils/fufireClient.ts` (nur lesend wiederverwenden) · `src/server/app.ratelimit.test.ts`
-(existiert; der Relationship-Rate-Limit-Nachweis kommt stattdessen in die neue
-`src/server/app.relationship.test.ts`) · `supabase/` · `package.json` · alles unter FuFirE.
+**Nicht im Scope:** `src/utils/synastry.ts` · `src/components/Synastry.tsx` ·
+`src/__tests__/synastryWording.test.ts` (P7-Bestand, D4) · `src/utils/interAspects.ts` und
+`src/utils/fufireClient.ts` (nur lesend) · `src/server/app.ratelimit.test.ts` · `supabase/` ·
+`package.json` · alles unter FuFirE.
 
 ---
 
 ## 10. Traceability links
 
-- **PRD:** `docs/prd/prd_report.md` · `docs/prd/prd_report.json` (Status: accepted; Canvas-Link wird beim Confirm nachgetragen)
-- **Product Vision:** `docs/vision/western-synastry.vision.md` — **noch nicht erstellt**, folgt nach Canvas-Confirm
-- **Traceability Matrix:** `docs/traceability.md` — Canvas-Felder für `western-synastry` werden in Phase 1 nach GO ergänzt
-- **Related REQ IDs:** `REQ-F-001`…`REQ-F-011`, `REQ-D-001`…`REQ-D-004`, `REQ-A-001`…`REQ-A-005`, `REQ-NF-001`…`REQ-NF-005`, `REQ-S-001`…`REQ-S-005`, `REQ-O-001`, `REQ-DOC-001`
+- **PRD:** `docs/prd/prd_report.md` — Canvas-Link + AC-ID-Kollision (F-16) beim Neuschnitt nachzutragen
+- **Product Vision:** `docs/vision/western-synastry.vision.md` — **noch nicht erstellt**
+- **Traceability Matrix:** `docs/traceability.md` — Canvas-Felder in Phase 1 nach GO
+- **Audit:** `docs/reviews/2026-07-20-independent-blindspot-audit.md`
 - **True-Line status:** `draft`
 
 ---
 
 ## User confirmation
 
-**Confirmed by user:** yes
-**Confirmation date:** 2026-07-20
-**Confirmed by:** Benjamin Poersch (Product Owner)
-**Confirmation note:** Ausdrückliche Bestätigung dieses Canvas als Wertbasis für den
-`/agileteam`-Lauf, einschließlich der drei unten benannten Grenzen (R4 / D5 / keine
-öffentliche Freigabe). Bestätigt wurde ebenfalls: Phase 0.16 Council **und** ein
-unabhängiger Blindstellen-Spec-Audit laufen, statt sich auf die nicht-unabhängigen
-Reviews vom 2026-07-19 zu stützen.
+**Confirmed by user:** no — **Re-Confirm ausstehend**
+**Confirmation date:** —
 
-Alle Felder sind beantwortet; kein Feld steht mehr auf `MISSING` oder `OPEN QUESTION`.
-Vorentscheidungen des Nutzers vom 2026-07-20, die in diesen Canvas eingeflossen sind:
+### Entscheidungsprotokoll dieses Laufs
 
 | # | Entscheidung | Wirkung |
 |---|---|---|
 | D1 | Zielrepo `astro-synestrie`, Fork mit voller New_Bazi-Historie | Repo umgebaut, `upstream` erhalten |
-| D2 | Lauf-Scope TASK-001…013, dann Gate | Evidenzklasse endet bei `integration` |
-| D3 | Warum jetzt: **Marktvalidierung vor Investment** | prägt Success Signal Stufe 2 |
-| D4 | R5 = Variante (a): Score-Scan auf neuen Flow begrenzen | P7-Altbestand unberührt |
-| D5 | Allowed change scope **eng**: nur neue Dateien | Bestandsdateien = harter Stop |
+| D2 | Lauf-Scope TASK-001…013 | durch D6 überholt — neuer Schnitt folgt |
+| D3 | Warum jetzt: **Marktvalidierung vor Investment** | trägt D6 |
+| D4 | R5 = Score-Scan auf neuen Flow begrenzen | P7-Bestand unberührt |
+| D5 | Allowed change scope eng | Bestandsdateien = harter Stop |
+| D6 | **Fixture-Prototyp zuerst, dann Usability-Gate** | §5 neu geordnet |
+| D7 | **Auswahlregel im UI sichtbar machen** | §4 ergänzt, R12 mitigiert |
+| D8 | **Synthetische Zweitpersonen bis zur Rechtsprüfung** | R13 vom kritischen Pfad |
+| D9 | **Plan wird neu geschrieben** | R14 |
+| D10 | **Scope geöffnet für `scripts/`, `playwright.config.ts`, `src/__fixtures__/`** | Stufe 0 + R11-Fix möglich |
 
-Mit dem Confirm bestätigst du zugleich die drei Grenzen, die dieser Lauf **nicht**
-überschreitet:
+### Was du mit dem Re-Confirm mitbestätigst
 
-1. **R4** — ohne Staging-Credentials kein `real-boundary-smoke`. Der Lauf endet nach
-   TASK-013 bei Evidenzklasse `integration` und wird **nicht** als MVP-Done gemeldet.
-2. **D5** — `src/server/app.ts` ist out of scope. Ohne separate Freigabe ist die Route
-   nicht in Produktion verdrahtet (`wired-in-prod? = no`) und der Durchstich nicht lauffähig.
-3. **Keine öffentliche Freigabe** — `SEC-005` / `AC-013` bleiben blockiert.
+1. **§1 war sachlich falsch und ist korrigiert.** Häuser und Aszendent sind bereits durch
+   `BIRTH-TIME-01` geschützt; nur der Mond ist ungeschützt. Amendment 1 hatte das zu breit
+   behauptet — und du hattest es in dieser falschen Fassung bestätigt.
+2. **R10 kann das Feature kippen.** Ergibt der Engine-Spike, dass FuFirE die übergebene Uhrzeit
+   bei `birth_time_known:false` ignoriert, ist DEC-03 hinfällig und der Lauf stoppt mit Report —
+   kein Weiterbauen auf einer toten Annahme.
+3. **R11 bleibt offen, bis der Config-Fix und sein Dichtigkeitstest stehen.** Bis dahin darf
+   kein Ergebnis als `real-boundary-smoke` bezeichnet werden.
+4. **Keine öffentliche Freigabe**, keine echten Zweitpersonendaten.
+
+**Original Goal Status:** NOT DONE — der Real-Data-Durchstich (DEC-08) ist nicht erreicht.
+**Current Iteration Status:** Intake abgeschlossen, Nachweis-Apparat als defekt erkannt,
+Neuplanung freigegeben. Die beiden Zeilen bleiben getrennt.
